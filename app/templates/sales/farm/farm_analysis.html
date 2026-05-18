@@ -1,0 +1,249 @@
+{% extends 'sales_layout.html' %}
+{% block sales_content %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{url_for('static', filename='sales/sale_report.css')}}">
+
+<div class="container-fluid py-4">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div>
+      <h1 style="font-family:var(--font-display);font-size:2rem;color:var(--text-primary);margin:0 0 0.25rem;">Farm Analysis</h1>
+      <p style="color:var(--text-secondary);margin:0;font-size:0.9rem;">Analyze farm performance and trends</p>
+    </div>
+  </div>
+
+  <!-- Filter -->
+  <div class="card section-day">
+    <div class="card-header">
+      <span class="accent-dot"></span>
+      <h5>Filter Analysis</h5>
+      <span class="section-number ms-auto">01</span>
+    </div>
+    <div class="card-body">
+      <form id="filterForm">
+        <div class="row g-3 align-items-end">
+          <div class="col-md-4">
+            <label for="startDate" class="form-label">Start Date</label>
+            <input type="date" class="form-control" id="startDate" required>
+          </div>
+          <div class="col-md-4">
+            <label for="endDate" class="form-label">End Date</label>
+            <input type="date" class="form-control" id="endDate" required>
+          </div>
+          <div class="col-md-2">
+            <button type="submit" class="btn btn-primary w-100">
+              <i class="fas fa-filter"></i> Apply Filter
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="card section-summary">
+    <div class="card-header">
+      <span class="accent-dot"></span>
+      <h5>Period Summary</h5>
+      <span class="section-number ms-auto">02</span>
+    </div>
+    <div class="card-body">
+      <div class="summary-grid">
+        <div class="summary-block">
+          <h6>Sales & Production</h6>
+          <div class="summary-row">
+            <span>Total Sales</span>
+            <span class="val"><span id="totalSalesCard">0.00</span></span>
+          </div>
+          <div class="summary-row total">
+            <span>Total Production</span>
+            <span class="val"><span id="totalProductionCard">0</span></span>
+          </div>
+        </div>
+        <div class="summary-block">
+          <h6>Health & Feed</h6>
+          <div class="summary-row">
+            <span>Total Mortality</span>
+            <span class="val"><span id="totalMortalityCard">0</span></span>
+          </div>
+          <div class="summary-row total">
+            <span>Feed Used (Bags)</span>
+            <span class="val"><span id="totalFeedCard">0</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sales Chart -->
+  <div class="card section-open">
+    <div class="card-header">
+      <span class="accent-dot"></span>
+      <h5>Sales Trend</h5>
+      <span class="section-number ms-auto">03</span>
+    </div>
+    <div class="card-body">
+      <canvas id="salesChart" style="max-height:280px;"></canvas>
+    </div>
+  </div>
+
+  <!-- Production & Feed Charts -->
+  <div class="row g-3">
+    <div class="col-md-6">
+      <div class="card section-credit">
+        <div class="card-header">
+          <span class="accent-dot"></span>
+          <h5>Production vs Mortality</h5>
+          <span class="section-number ms-auto">04</span>
+        </div>
+        <div class="card-body">
+          <canvas id="productionMortalityChart" style="max-height:240px;"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card section-exp">
+        <div class="card-header">
+          <span class="accent-dot"></span>
+          <h5>Feed Consumption</h5>
+          <span class="section-number ms-auto">05</span>
+        </div>
+        <div class="card-body">
+          <canvas id="feedChart" style="max-height:240px;"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detailed Data Table -->
+  <div class="card section-farm" style="margin-top:1.5rem;">
+    <div class="card-header">
+      <span class="accent-dot"></span>
+      <h5>Detailed Analysis Data</h5>
+      <span class="section-number ms-auto">06</span>
+    </div>
+    <div class="card-body" style="padding:0 !important;">
+      <div class="table-responsive">
+        <table class="table table-sm table-bordered" id="analysisTable" width="100%" cellspacing="0">
+          <thead>
+            <tr>
+              <th>Date</th><th>Total Sales</th><th>Total Production</th>
+              <th>Total Mortality</th><th>Feed Used</th><th>Net Production</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="analysisTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+let salesChartInstance = null, productionMortalityChartInstance = null, feedChartInstance = null;
+
+// Chart.js dark-theme defaults matching sale_report.css
+const chartDefaults = {
+    color: 'rgba(255,255,255,0.6)',
+    borderColor: 'rgba(255,255,255,0.1)',
+    plugins: { legend: { labels: { color: 'rgba(255,255,255,0.7)', font: { family: 'DM Sans' } } } },
+    scales: {
+        x: { ticks: { color: 'rgba(255,255,255,0.5)' }, grid: { color: 'rgba(255,255,255,0.06)' } },
+        y: { ticks: { color: 'rgba(255,255,255,0.5)' }, grid: { color: 'rgba(255,255,255,0.06)' } }
+    }
+};
+
+document.getElementById('filterForm').addEventListener('submit', function(e) { e.preventDefault(); loadAnalysisData(); });
+
+function loadAnalysisData() {
+    const s = document.getElementById('startDate').value, e = document.getElementById('endDate').value;
+    if (!s || !e) { alert('Please select both start and end dates'); return; }
+    fetch(`/api/farm-analysis-data?start_date=${s}&end_date=${e}`)
+        .then(r => r.json())
+        .then(data => { updateSummaryCards(data); updateCharts(data); updateTable(data); })
+        .catch(err => {
+        console.error('Fetch error:', err);
+        alert('Error: ' + err.message);
+    });
+}
+
+function updateSummaryCards(data) {
+    let ts=0, tp=0, tm=0, tf=0;
+    data.forEach(i => { ts+=i.total_sales||0; tp+=i.total_production||0; tm+=i.total_mortality||0; tf+=i.total_feed||0; });
+    document.getElementById('totalSalesCard').textContent = ts.toFixed(2);
+    document.getElementById('totalProductionCard').textContent = tp;
+    document.getElementById('totalMortalityCard').textContent = tm;
+    document.getElementById('totalFeedCard').textContent = tf;
+}
+
+function updateCharts(data) {
+    const dates = data.map(i => i.date);
+    if (salesChartInstance) salesChartInstance.destroy();
+    if (productionMortalityChartInstance) productionMortalityChartInstance.destroy();
+    if (feedChartInstance) feedChartInstance.destroy();
+
+    salesChartInstance = new Chart(document.getElementById('salesChart').getContext('2d'), {
+        type: 'line',
+        data: { labels: dates, datasets: [
+            { label: 'Sales', data: data.map(i=>i.total_sales||0), borderColor: '#58a6ff', backgroundColor: 'rgba(88,166,255,0.08)', borderWidth: 2, fill: true, tension: 0.4 },
+            { label: 'Net Production', data: data.map(i=>i.total_net||0), borderColor: '#3fb950', backgroundColor: 'rgba(63,185,80,0.08)', borderWidth: 2, fill: true, tension: 0.4 }
+        ]},
+        options: { responsive: true, ...chartDefaults }
+    });
+
+    productionMortalityChartInstance = new Chart(document.getElementById('productionMortalityChart').getContext('2d'), {
+        type: 'bar',
+        data: { labels: dates, datasets: [
+            { label: 'Production', data: data.map(i=>i.total_production||0), backgroundColor: 'rgba(63,185,80,0.7)', borderRadius: 4 },
+            { label: 'Mortality', data: data.map(i=>i.total_mortality||0), backgroundColor: 'rgba(248,81,73,0.7)', borderRadius: 4 }
+        ]},
+        options: { responsive: true, ...chartDefaults }
+    });
+
+    feedChartInstance = new Chart(document.getElementById('feedChart').getContext('2d'), {
+        type: 'bar',
+        data: { labels: dates, datasets: [
+            { label: 'Feed Used (Bags)', data: data.map(i=>i.total_feed||0), backgroundColor: 'rgba(210,153,34,0.7)', borderRadius: 4 }
+        ]},
+        options: { responsive: true, ...chartDefaults }
+    });
+}
+
+function updateTable(data) {
+    const tb = document.getElementById('analysisTableBody');
+    tb.innerHTML = '';
+    data.forEach(item => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td style="font-family:var(--font-display)">${item.date}</td>
+            <td>${item.total_sales ? item.total_sales.toFixed(2) : '0.00'}</td>
+            <td>${item.total_production || 0}</td>
+            <td>${item.total_mortality || 0}</td>
+            <td>${item.total_feed || 0}</td>
+            <td>${item.total_net ? item.total_net.toFixed(2) : '0.00'}</td>
+            <td><a href="/farm-report/${item.date}" class="btn btn-sm btn-primary"><i class="fas fa-eye"></i> View</a></td>
+        `;
+        tb.appendChild(row);
+    });
+    if (typeof $.fn.DataTable !== 'undefined') {
+        if ($.fn.DataTable.isDataTable('#analysisTable')) { $('#analysisTable').DataTable().destroy(); }
+        $('#analysisTable').DataTable({ order: [[0, 'desc']], pageLength: 10 });
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const end = new Date(), start = new Date();
+    start.setDate(start.getDate() - 30);
+    document.getElementById('startDate').valueAsDate = start;
+    document.getElementById('endDate').valueAsDate = end;
+    loadAnalysisData();
+});
+</script>
+{% endblock %}

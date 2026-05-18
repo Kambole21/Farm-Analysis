@@ -1,0 +1,39 @@
+
+
+.table-header th {
+    border-bottom: 1px solid #dee2e6; /* Adjust the px for thickness */
+    font-size: small;
+}
+.table .badge-active{
+    background-color: rgb(150, 231, 185);
+    color: rgb(20, 130, 67);
+    border-radius: 20px;
+    font-size: smaller;
+}
+.table .badge-closed{
+    background-color: rgb(237, 172, 172);
+    color: rgb(130, 20, 20);
+    border-radius: 20px;
+    font-size: smaller;
+}
+
+.table-day-details{
+    font-size:smaller;
+}
+
+.nav-link{
+    color: rgb(86, 85, 85);
+}
+
+.opening-stock-table{
+    background-color: rgb(154, 218, 182);
+    height: 60px;
+    padding: 0.1rem 1rem;
+}
+
+.table .badge-record{
+    background-color: rgb(218, 246, 249);
+    color: rgb(54, 139, 148);
+    border-radius: 20px;
+    font-size: smaller;
+}

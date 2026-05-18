@@ -1,0 +1,23 @@
+#back {
+  background-color: #4a5c6a; /* gray-300 */           /* gray-800 */
+  font-weight: bold;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  outline: none;
+  margin-top: 10px;
+}
+
+#back:hover {
+  background-color: #9ca3af; /* gray-400 */
+}
+
+#back:focus {
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5); /* mimic focus:shadow-outline */
+}
+
+#view{
+  background-color: var(--faint-blue);
+}
+#view:hover{
+  background-color: var(--mid-blue);
+}

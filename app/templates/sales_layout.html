@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}FarmFlow — Sales & Operations{% endblock %}</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Flatpickr -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{url_for('static', filename = 'sales/sales_layout.css')}}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+</head>
+<body>
+
+    <!-- ── TOP HEADER ── -->
+    <header class="top-header">
+        <a href="{{ url_for('sales_dashboard.sales_dashboard') }}" class="header-brand">
+            <!-- <div class="brand-icon">🌾</div> -->
+            <div>
+                <div class="brand-name">CHATWALA-ENSA</div>
+                <div class="brand-tagline">FARM's/Sales Analysis</div>
+            </div>
+        </a>
+
+
+        <button class="sidebar-toggle-btn" onclick="toggleSidebar()" title="Toggle menu" aria-label="Toggle sidebar" class="header-brand">
+            <span class="toggle-bar"></span>
+            <span class="toggle-bar"></span>
+            <span class="toggle-bar"></span>
+        </button>
+
+        <div class="header-actions">
+            {% if active_date %}
+            <div class="active-day-pill">
+                <span class="dot"></span>
+                Live · {{ active_date }}
+            </div>
+            {% endif %}
+
+            <a href="{{ url_for('sales.sales_management') }}" class="header-btn position-relative" title="Daily Sales">
+                <i class="fas fa-cash-register"></i>
+            </a>
+
+            <div class="header-btn position-relative" title="Notifications">
+                <i class="fas fa-bell"></i>
+                <span class="badge-dot"></span>
+            </div>
+
+            <div class="avatar" title="{{ session.get('user_name', 'U') }}">
+                {{ (session.get('user_name', 'U') | upper)[0] }}
+            </div>
+        </div>
+    </header>
+
+    <!-- ── SIDEBAR OVERLAY (mobile) ── -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <!-- ── LAYOUT ── -->
+    <div class="layout-wrapper">
+
+        <!-- ── SIDEBAR ── -->
+        <nav class="sidebar" id="sidebar">
+
+            <div class="sidebar-section-label">Sales Operations</div>
+
+            <a class="nav-link {{ 'active' if request.endpoint == 'sales.sales_management' }}"
+               href="{{ url_for('sales.sales_management') }}">
+                <span class="nav-icon"><i class="fas fa-calendar-day"></i></span>
+                Daily Sales
+                {% if active_date %}
+                <span class="nav-badge ff-badge-green">Live</span>
+                {% endif %}
+            </a>
+
+            <a class="nav-link {{ 'active' if request.endpoint == 'view_sales_day.sales_day' }}"
+               href="{{ url_for('view_sales_day.sales_day') }}">
+                <span class="nav-icon"><i class="fas fa-chart-bar"></i></span>
+                View Sales Days
+            </a>
+
+<!--             <a class="nav-link" href="#">
+                <span class="nav-icon"><i class="fas fa-chart-line"></i></span>
+                Sales Reports
+            </a>
+
+            <a class="nav-link" href="#">
+                <span class="nav-icon"><i class="fas fa-file-invoice-dollar"></i></span>
+                Credit Reports
+            </a>
+
+            <a class="nav-link" href="#">
+                <span class="nav-icon"><i class="fas fa-boxes-stacked"></i></span>
+                Stock Management
+            </a> -->
+
+            <div class="sidebar-section-label">Farm Management</div>
+
+            <a class="nav-link {{ 'active' if request.endpoint == 'farm_report.farm_management' }}"
+               href="{{ url_for('farm_report.farm_management') }}">
+                <span class="nav-icon"><i class="fas fa-tractor"></i></span>
+                Farm Overview
+            </a>
+
+            <a class="nav-link {{ 'active' if request.endpoint == 'farm_report.farm_report' }}"
+               href="{{ url_for('farm_report.farm_report') }}">
+                <span class="nav-icon"><i class="fas fa-clipboard-list"></i></span>
+                Farm Reports
+            </a>
+
+            <a class="nav-link {{ 'active' if request.endpoint == 'farm_report.farm_analysis' }}"
+               href="{{ url_for('farm_report.farm_analysis') }}">
+                <span class="nav-icon"><i class="fas fa-microscope"></i></span>
+                Farm Analysis
+            </a>
+
+            <a class="nav-link {{ 'active' if request.endpoint == 'view_farm_day.farm_day' }}"
+               href="{{ url_for('view_farm_day.farm_day') }}">
+                <span class="nav-icon"><i class="fas fa-egg"></i></span>
+                Farm Day Analytics
+            </a>
+
+            <div class="sidebar-divider"></div>
+
+            <!-- Quick stats -->
+            {% if active_date %}
+            <div class="sidebar-stat-box">
+                <div class="stat-title">Active Day</div>
+                <div class="stat-value" style="font-size:0.95rem; color: var(--accent-green);">{{ active_date }}</div>
+                <div class="stat-sub">Session in progress</div>
+            </div>
+            {% else %}
+            <div class="sidebar-stat-box">
+                <div class="stat-title">Status</div>
+                <div class="stat-value" style="font-size:0.95rem; color: var(--text-muted);">No Active Day</div>
+                <div class="stat-sub"><a href="{{ url_for('sales.sales_management') }}" style="color: var(--accent-blue); font-size:0.78rem;">Start a day →</a></div>
+            </div>
+            {% endif %}
+
+        </nav>
+
+        <!-- ── MAIN ── -->
+        <main class="main-content">
+
+            <!-- Flash messages -->
+            <div class="flash-container">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                        <div class="flash-msg ff-alert-{{ 'success' if category == 'success' else 'danger' if category == 'danger' else 'warning' }}">
+                            <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' }}"></i>
+                            {{ message }}
+                        </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+            </div>
+
+            {% block sales_content %}{% endblock %}
+        </main>
+    </div>
+
+    <!-- Bootstrap Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+    <script>
+        // Auto-dismiss flash messages
+        setTimeout(() => {
+            document.querySelectorAll('.flash-msg').forEach(el => {
+                el.style.transition = 'opacity 0.5s, transform 0.5s';
+                el.style.opacity = '0';
+                el.style.transform = 'translateX(20px)';
+                setTimeout(() => el.remove(), 500);
+            });
+        }, 4000);
+
+        // Mobile sidebar toggle
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            const btn = document.querySelector('.sidebar-toggle-btn');
+            const isOpen = sidebar.classList.toggle('open');
+            btn.classList.toggle('is-open', isOpen);
+            overlay.classList.toggle('visible', isOpen);
+            // Prevent body scroll when sidebar is open on mobile
+            document.body.style.overflow = isOpen ? 'hidden' : '';
+        }
+        
+    </script>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

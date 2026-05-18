@@ -1,0 +1,46 @@
+/* Add to your cards.css file */
+.card-analysis {
+    min-height: 400px;
+}
+
+.card-analysis .card-body {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+}
+
+#cash-chart-container,
+#expenses-chart-container {
+    flex: 1;
+    min-height: 0;
+    position: relative;
+}
+
+canvas {
+    max-width: 100%;
+    height: auto !important;
+    width: 100% !important;
+}
+
+/* Button styles */
+.btn-group-sm .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+}
+
+.btn-outline-primary.active {
+    background-color: #007bff;
+    color: white;
+}
+
+.btn-outline-secondary.active {
+    background-color: #6c757d;
+    color: white;
+}
+
+/* No data message */
+.no-data-message {
+    height: 300px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+}

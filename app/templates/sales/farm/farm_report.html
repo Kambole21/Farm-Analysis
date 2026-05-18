@@ -1,0 +1,126 @@
+{% extends 'sales_layout.html' %}
+{% block sales_content %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{url_for('static', filename='sales/sale_report.css')}}">
+
+<div class="container-fluid py-4">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div>
+      <h1 style="font-family:var(--font-display);font-size:2rem;color:var(--text-primary);margin:0 0 0.25rem;">Daily Reports</h1>
+      <p style="color:var(--text-secondary);margin:0;font-size:0.9rem;">Create and manage daily farm activity reports</p>
+    </div>
+  </div>
+
+  <!-- Create New Report -->
+  <div class="card section-day">
+    <div class="card-header">
+      <span class="accent-dot"></span>
+      <h5>Create New Report</h5>
+      <span class="section-number ms-auto">01</span>
+    </div>
+    <div class="card-body">
+      <form id="createDateForm">
+        <div class="row g-3 align-items-end">
+          <div class="col-md-4">
+            <label for="reportDate" class="form-label">Report Date</label>
+            <input type="date" class="form-control" id="reportDate" required>
+          </div>
+          <div class="col-md-2">
+            <button type="submit" class="btn btn-primary w-100">
+              <i class="fas fa-plus-circle"></i> Create Report
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Existing Reports -->
+  <div class="card section-summary">
+    <div class="card-header">
+      <span class="accent-dot"></span>
+      <h5>Existing Reports</h5>
+      {% if report_dates %}
+      <span style="margin-left:auto;font-size:0.78rem;color:var(--text-secondary);">{{ report_dates|length }} report{{ 's' if report_dates|length != 1 }}</span>
+      {% endif %}
+    </div>
+    <div class="card-body" style="padding:0 !important;">
+      {% if report_dates %}
+      <div class="table-responsive">
+        <table class="table table-sm table-bordered" id="reportsTable">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Created By</th>
+              <th>Created At</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for report in report_dates %}
+            <tr>
+              <td style="font-family:var(--font-display);font-size:1rem;">{{ report.date }}</td>
+              <td style="color:var(--text-secondary);font-size:0.85rem;">{{ report.created_by }}</td>
+              <td style="color:var(--text-muted);font-size:0.82rem;">{{ report.created_at|format_date('%Y-%m-%d %H:%M') }}</td>
+              <td><span class="badge bg-success">Active</span></td>
+              <td style="display:flex;gap:0.5rem;">
+                <a href="{{ url_for('farm_report.view_farm_report_day', date=report.date) }}" class="btn btn-sm btn-primary">
+                  <i class="fas fa-edit"></i> Edit
+                </a>
+                <button onclick="deleteReport('{{ report.date }}')" class="btn btn-sm btn-danger">
+                  <i class="fas fa-trash"></i> Delete
+                </button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div style="text-align:center;padding:4rem 2rem;">
+        <div style="font-size:2.5rem;opacity:0.3;margin-bottom:1rem;">📋</div>
+        <h5 style="font-family:var(--font-display);color:var(--text-secondary);font-weight:400;margin-bottom:0.5rem;">No reports yet</h5>
+        <p style="color:var(--text-muted);font-size:0.88rem;">Create your first farm report by selecting a date above.</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+
+<script>
+document.getElementById('createDateForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const date = document.getElementById('reportDate').value;
+    if (!date) { alert('Please select a date'); return; }
+    const formData = new FormData();
+    formData.append('date', date);
+    fetch('/api/create-report-date', { method: 'POST', body: formData })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) { window.location.href = `/farm-report/${date}`; }
+            else { alert(data.message); }
+        })
+        .catch(() => alert('An error occurred. Please try again.'));
+});
+
+function deleteReport(date) {
+    if (confirm(`Delete the report for ${date}? This cannot be undone.`)) {
+        fetch(`/api/delete-report-date/${date}`, { method: 'DELETE' })
+            .then(r => r.json())
+            .then(data => { if (data.success) { location.reload(); } else { alert('Error deleting report'); } })
+            .catch(() => alert('An error occurred.'));
+    }
+}
+
+{% if report_dates %}
+$(document).ready(function() {
+    $('#reportsTable').DataTable({ "order": [[0, "desc"]] });
+});
+{% endif %}
+</script>
+{% endblock %}

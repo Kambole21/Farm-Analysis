@@ -1,0 +1,315 @@
+
+<!-- the file below is view_farm_day.html -->
+{% extends 'sales_layout.html' %}
+{% block sales_content %}
+    <link rel="stylesheet" href="{{url_for('static', filename='sales/view_sales.css')}}">
+    <link rel="stylesheet" href="{{url_for('static', filename='sales/cards.css')}}">
+    <link rel="stylesheet" href="{{url_for('static', filename='sales/table.css')}}">
+    <link rel="stylesheet" href="{{url_for('static', filename='sales/sale_report.css')}}">
+<div class="container-fluid">
+    <div class="row">
+        <!-- Main content -->
+        <main class="col-md-12 px-md-4">
+            <!-- Page Title -->
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Farm Day Analytics</h1>
+                    <div class=" mb-2 mb-md-0">
+                        <div class="btn view-sales">
+                            <span><img src="{{url_for('static', filename='gifs/delivery-truck.gif')}}" alt="" class="nav-bar-icon"><a href="{{url_for('view_sales_day.sales_day')}}">View Daily Sales</a></span>
+                        </div>
+                    </div>
+            </div>
+
+            <!-- Date Selection -->
+            <div class="card mb-4 date-picker-card">
+                <div class="card-header">
+                    <h5 class="mb-0 opacity-50">Select Date to View Farm Details</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <label class="form-label">Select Month</label>
+                            <input type="month" id="monthPicker" class="form-control" onchange="renderMonthDays()">
+                            
+                            <div id="daysGrid" class="mt-3 d-flex flex-wrap gap-2"></div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">&nbsp;</label>
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-info" onclick="loadCurrentDay()">
+                                    <i class="fas fa-calendar-day"></i> Today's Farm Report
+                                </button>
+                                <button class="btn btn-outline-secondary" onclick="loadPreviousDay()">
+                                    <i class="fas fa-arrow-left"></i> Previous Day
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading Indicator -->
+            <div id="loadingIndicator" class="text-center d-none">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2">Loading farm day details...</p>
+            </div>
+
+            <!-- Day Details Container -->
+            <div id="dayDetailsContainer" class="d-none">
+                <!-- Day Summary Stats -->
+                <div class="row mb-4" id="summaryStats">
+                    <!-- Dynamic content will be loaded here -->
+                </div>
+
+                <!-- Day Information -->
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0" id="dayTitle">Farm Day Details</h5>
+                        <div>
+                            <button class="btn btn-sm btn-light me-2" onclick="exportFarmDayReport()">
+                                <i class="fas fa-file-export"></i> Export
+                            </button>
+                            <button class="btn btn-sm btn-warning" onclick="printFarmDayReport()">
+                                <i class="fas fa-print"></i> Print
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row" id="dayInfo">
+                            <!-- Dynamic content will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabs for different sections -->
+                <ul class="nav nav-tabs mb-4" id="dayTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active opacity-75" id="poultry-tab" data-bs-toggle="tab" data-bs-target="#poultry" type="button" role="tab">
+                            <i class="fas fa-egg me-1"></i> Poultry
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="farm-sales-tab" data-bs-toggle="tab" data-bs-target="#farm-sales" type="button" role="tab">
+                            <i class="fas fa-cash-register me-1"></i> Sales
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="production-tab" data-bs-toggle="tab" data-bs-target="#production" type="button" role="tab">
+                            <i class="fas fa-chart-line me-1"></i> Production
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="feed-tab" data-bs-toggle="tab" data-bs-target="#feed" type="button" role="tab">
+                            <i class="fas fa-apple-alt me-1"></i> Feed
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="mortality-tab" data-bs-toggle="tab" data-bs-target="#mortality" type="button" role="tab">
+                            <i class="fas fa-skull-crossbones me-1"></i> Mortality
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="percentage-tab" data-bs-toggle="tab" data-bs-target="#percentage" type="button" role="tab">
+                            <i class="fas fa-percent me-1"></i> Percentages
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="farm-activity-tab" data-bs-toggle="tab" data-bs-target="#farm-activity" type="button" role="tab">
+                            <i class="fas fa-history me-1"></i> Activity Log
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="farm-users-tab" data-bs-toggle="tab" data-bs-target="#farm-users" type="button" role="tab">
+                            <i class="fas fa-users me-1"></i> Users Involved
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- Tab Content -->
+                <div class="tab-content" id="dayTabContent">
+                    <!-- Poultry Tab -->
+                    <div class="tab-pane fade show active" id="poultry" role="tabpanel">
+                        <div class="table-responsive" id="poultryDetails">
+                            <!-- Dynamic content -->
+                        </div>
+                    </div>
+
+                    <!-- Farm Sales Tab -->
+                    <div class="tab-pane fade" id="farm-sales" role="tabpanel">
+                        <div id="farmSalesDetails">
+                            <!-- Dynamic content -->
+                        </div>
+                    </div>
+
+                    <!-- Production Tab -->
+                    <div class="tab-pane fade" id="production" role="tabpanel">
+                        <div id="productionDetails">
+                            <!-- Dynamic content -->
+                        </div>
+                    </div>
+
+                    <!-- Feed Tab -->
+                    <div class="tab-pane fade" id="feed" role="tabpanel">
+                        <div id="feedDetails">
+                            <!-- Dynamic content -->
+                        </div>
+                    </div>
+
+                    <!-- Mortality Tab -->
+                    <div class="tab-pane fade" id="mortality" role="tabpanel">
+                        <div id="mortalityDetails">
+                            <!-- Dynamic content -->
+                        </div>
+                    </div>
+
+                    <!-- Percentage Tab -->
+                    <div class="tab-pane fade" id="percentage" role="tabpanel">
+                        <div id="percentageDetails">
+                            <!-- Dynamic content -->
+                        </div>
+                    </div>
+
+                    <!-- Activity Log Tab -->
+                    <div class="tab-pane fade" id="farm-activity" role="tabpanel">
+                        <div class="activity-timeline" id="activityLog">
+                            <!-- Dynamic content -->
+                        </div>
+                    </div>
+
+                    <!-- Users Tab -->
+                    <div class="tab-pane fade" id="farm-users" role="tabpanel">
+                        <div id="usersDetails">
+                            <!-- Dynamic content -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- No Data Message -->
+            <div id="noDataMessage" class="text-center text-muted d-none">
+                <i class="fas fa-calendar-times fa-3x mb-3"></i>
+                <h4>No Date Selected</h4>
+                <p>Please select a date from the calendar above to view detailed farm information.</p>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- Comparison Modal -->
+<div class="modal fade" id="comparisonModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="fas fa-balance-scale me-2"></i>Compare Farm Days</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <label for="compareDate1" class="form-label">First Date</label>
+                        <select class="form-select" id="compareDate1">
+                            <option value="">Select first date...</option>
+                            {% for date_item in dates %}
+                            <option value="{{ date_item.date }}">{{ date_item.date }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="compareDate2" class="form-label">Second Date</label>
+                        <select class="form-select" id="compareDate2">
+                            <option value="">Select second date...</option>
+                            {% for date_item in dates %}
+                            <option value="{{ date_item.date }}">{{ date_item.date }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div id="comparisonResults" class="mt-4 d-none">
+                    <!-- Comparison results will be loaded here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="compareSelectedDates()">Compare</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Date Filter Modal -->
+<div class="modal fade" id="dateFilterModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title"><i class="fas fa-filter me-2"></i>Filter Farm Dates</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="filterStatus" class="form-label">Status</label>
+                    <select class="form-select" id="filterStatus">
+                        <option value="all">All Dates</option>
+                        <option value="with_data">With Data Only</option>
+                    </select>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="filterDateFrom" class="form-label">From Date</label>
+                        <input type="date" class="form-control" id="filterDateFrom">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="filterDateTo" class="form-label">To Date</label>
+                        <input type="date" class="form-control" id="filterDateTo">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="applyFilters()">Apply Filters</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Pass data from Flask to JavaScript - make sure this is BEFORE including view_farm.js -->
+    <script>
+        // Make dates data available to the external JavaScript file
+        window.datesData = {{ dates|tojson }};
+    </script>
+    
+    <!-- Link to external JavaScript file -->
+    <script src="{{ url_for('static', filename='js/view_farm_day.js') }}"></script>
+
+<!-- Additional CSS for farm-specific styling -->
+<style>
+    .stat-card.stats-feed {
+        background: linear-gradient(135deg, #ffd966, #ffe599);
+    }
+    .stat-card.stats-mortality {
+        background: linear-gradient(135deg, #ea9999, #f4cccc);
+    }
+    .badge-record {
+        background-color: #6c757d;
+        color: white;
+        padding: 0.35em 0.65em;
+        font-size: 0.75em;
+        font-weight: 700;
+        border-radius: 0.25rem;
+    }
+    .day-btn.active {
+        background-color: #007bff;
+        color: white;
+        border-color: #007bff;
+    }
+    .progress {
+        height: 25px;
+        margin-bottom: 10px;
+    }
+    .progress-bar {
+        line-height: 25px;
+        font-size: 0.85rem;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,125 @@
+/* Gantt Chart Container */
+.gantt-container {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* SVG Container */
+.gantt-svg {
+  width: 100%;
+  background-color: #ffffff;
+  border-radius: 0.5rem;
+}
+
+/* Axes */
+.x-axis path,
+.y-axis path,
+.x-axis line,
+.y-axis line {
+  stroke: #e5e7eb;
+  stroke-width: 1px;
+  shape-rendering: crispEdges;
+}
+
+.x-axis text,
+.y-axis text,
+.axis-text {
+  fill: #4b5563;
+  font-weight: 500;
+}
+
+/* Grid Lines */
+.grid line {
+  stroke: #e5e7eb;
+  stroke-width: 1px;
+  stroke-opacity: 0.5;
+  stroke-dasharray: 3,3;
+}
+
+/* Task Bars */
+.task-bg {
+  fill: #f3f4f6;
+  rx: 4px;
+  ry: 4px;
+  stroke: #d1d5db;
+  stroke-width: 1px;
+}
+
+.task-progress {
+  rx: 4px;
+  ry: 4px;
+  stroke: #ffffff;
+  stroke-width: 1px;
+  transition: width 0.2s ease;
+}
+
+.task-progress-marketing {
+  fill: #3b82f6;
+}
+
+.task-progress-sales {
+  fill: #10b981;
+}
+
+.task-progress-design {
+  fill: #f59e0b;
+}
+
+.task-progress-development {
+  fill: #8b5cf6;
+}
+
+/* Task Labels */
+.task-label {
+  fill: #ffffff;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Dependency Arrows */
+.dependency-arrow {
+  stroke: #6b7280;
+  stroke-width: 1.5px;
+  fill: none;
+}
+
+.arrowhead {
+  fill: #6b7280;
+}
+
+/* Hover Effects */
+.task-bar:hover .task-bg {
+  fill: #e5e7eb;
+}
+
+.task-bar:hover .task-progress {
+  opacity: 0.9;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .gantt-svg {
+    width: 100%;
+    height: auto;
+  }
+
+  .x-axis text,
+  .y-axis text,
+  .axis-text {
+    font-size: 0.65rem;
+  }
+
+  .task-label {
+    font-size: 0.65rem;
+  }
+}
+
+/* No Tasks Message */
+#gantt_chart .no-tasks {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  padding: 2rem;
+}

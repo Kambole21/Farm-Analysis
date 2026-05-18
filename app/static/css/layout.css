@@ -1,0 +1,37 @@
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
+    
+    body {
+      font-family: "Outfit", sans-serif;
+    }
+    
+    .dropdown-content {
+      transition: all 0.3s ease;
+      transform-origin: top;
+      opacity: 0;
+      transform: scaleY(0);
+      display: block;
+    }
+    
+    .group:hover .dropdown-content {
+      opacity: 1;
+      transform: scaleY(1);
+    }
+    
+    .rotate-180 {
+      transform: rotate(180deg);
+    }
+    
+    .mobile-dropdown-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+    
+    .mobile-dropdown-content.open {
+      max-height: 500px; /* Adjust based on your content */
+    }
+nav{
+    position: sticky;
+    z-index: 1030;
+    top: 0;
+}

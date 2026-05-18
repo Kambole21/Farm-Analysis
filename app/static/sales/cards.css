@@ -1,0 +1,214 @@
+.recent-icon{
+
+    width: 30px;
+    height: 30px;
+
+}
+.menu-icon{
+
+    width: 30px;
+    height: 30px;
+
+}
+
+
+
+/* Add box-shadow to the card */
+.card {
+    box-shadow: 0 4px 4px rgb(231, 231, 231);
+    border-radius: 8px; /* optional, for smoother edges */
+    border-color: rgb(239, 239, 239);
+}
+
+/* Align the icon to the far left */
+.stat-card .icons {
+    display: flex;
+    justify-content: flex-start; /* pushes icon to the left */
+    margin-right: 1rem; /* optional spacing */
+}
+
+.stat-card .hearder-icons i {
+    font-size: 2rem; /* adjust size if needed */
+    color: #4CAF50;  /* optional color styling */
+}
+.hearder-icons {
+    background-color: #bce9cb; 
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%; /* Makes it a circle */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    transition: transform 0.2s ease; /* Optional: smooth hover effect */
+}
+
+.hearder-icons:hover {
+    transform: translateY(-2px); /* Lifts slightly on hover */
+}
+.hearder-icons img{
+    width: 25px;
+    height: 25px;
+}
+
+.header-border{
+    border-top: 3px solid #bce9cb !important;
+    opacity: 1;
+    border-radius:5px;
+}
+
+.expenses .header-border{
+    border-top: 3px solid #87a1b7 !important;
+    opacity: 1;
+    border-radius:5px;
+}
+
+.expenses .hearder-icons{
+    background-color: #c6daed; 
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%; /* Makes it a circle */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    transition: transform 0.2s ease; /* Optional: smooth hover effect */
+}
+
+.profit .header-border{
+    border-top: 3px solid #e1c4ed !important;
+    opacity: 1;
+    border-radius:5px;
+}
+
+.profit .hearder-icons{
+    background-color: #eadbf1; 
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%; /* Makes it a circle */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    transition: transform 0.2s ease; /* Optional: smooth hover effect */
+}
+
+.active .header-border{
+    border-top: 3px solid #f2d0c7 !important;
+    opacity: 1;
+    border-radius:5px;
+}
+
+.active .hearder-icons{
+    background-color: #f2d0c7; 
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%; /* Makes it a circle */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    transition: transform 0.2s ease; /* Optional: smooth hover effect */
+}
+.card h5{
+    font-size: medium;
+}
+
+.farm-hearder-icons {
+    background-color: #dfe1e7; 
+    width: 70px;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%; /* Makes it a circle */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    transition: transform 0.2s ease; /* Optional: smooth hover effect */
+}
+
+.farm-hearder-icons:hover {
+    transform: translateY(-2px); /* Lifts slightly on hover */
+}
+.farm-hearder-icons img{
+    width: 30px;
+    height: 30px;
+}
+.view-sales{
+    display: flex;
+    margin: 0.2rem;
+    background-color: #c9d5e0;
+    border-radius: 20px;
+}
+.btn .nav-bar-icon{
+    width:30px;
+    height: 30px;
+    background-color: transparent;
+    border-radius: 25px;
+}
+.view-sales a{
+    text-decoration: none;
+    padding-right: 0.5rem;
+    color: black;
+    font-weight: 500;
+}
+.view-sales {
+    transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.view-sales:hover {
+    color: #3e8f77;
+    transform: scale(1.1); /* grows slightly */
+}
+.view-farm{
+    display: flex;
+    margin: 0.2rem;
+    background-color: #b6e2d1;
+    border-radius: 20px;
+}
+.btn .nav-bar-icon{
+    width:30px;
+    height: 30px;
+    background-color: transparent;
+    border-radius: 25px;
+}
+.view-farm a{
+    text-decoration: none;
+    padding-right: 0.5rem;
+    color: black;
+    font-weight: 500;
+}
+.view-farm {
+    transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.view-farm:hover {
+    color: #3e8f77;
+    transform: scale(1.1); /* grows slightly */
+}
+
+.day-icons img{
+    width: 50x;
+    height: 50px;
+}
+.btn-play {
+    background-color: rgb(34, 117, 156);
+    color: black;
+    transition: color 0.3s ease, transform 0.3s ease; /* smooth color + scale */
+}
+
+.btn-play:hover {
+    background-color: rgb(8, 52, 72);
+    color: rgb(153, 153, 153);
+    transform: scale(1.05); /* slightly enlarges the button */
+}
+
+.profit .stat-value{
+    color: #3e8f77;
+}
+.info .stat-value{
+    color: rgb(8, 86, 176);
+}
+.nav-tabs .nav-link{
+    font-weight: 900;
+    color: cornsilk;
+}

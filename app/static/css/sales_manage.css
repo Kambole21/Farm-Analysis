@@ -1,0 +1,36 @@
+.card {
+    border: 1px solid #dee2e6;
+    border-radius: 10px;
+}
+
+.card-header {
+    border-radius: 10px 10px 0 0 !important;
+}
+
+.list-group-item {
+    border-left: none;
+    border-right: none;
+}
+
+.list-group-item:first-child {
+    border-top: none;
+}
+
+.list-group-item:last-child {
+    border-bottom: none;
+}
+
+.form-control:focus {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.btn {
+    border-radius: 5px;
+    font-weight: 500;
+}
+
+.badge {
+    font-size: 0.85em;
+    padding: 0.35em 0.65em;
+}

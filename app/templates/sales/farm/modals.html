@@ -1,0 +1,67 @@
+<!-- the file below is modals.html -->
+
+<!-- Poultry Modal -->
+<div class="modal fade" id="poultryModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Poultry Data</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="poultryForm">
+                    <input type="hidden" id="poultryHouse">
+                    <div class="form-group">
+                        <label>Gross Profit</label>
+                        <input type="number" class="form-control" id="grossProfit" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Damage Value</label>
+                        <input type="number" class="form-control" id="damageValue" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Net Production</label>
+                        <input type="number" class="form-control" id="netProduction" step="0.01" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="savePoultry()">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Sales Modal -->
+<div class="modal fade" id="salesModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Sales Data</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="salesForm">
+                    <input type="hidden" id="salesProductType">
+                    <div class="form-group">
+                        <label>Quantity</label>
+                        <input type="number" class="form-control" id="salesQuantity" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Unit Price</label>
+                        <input type="number" class="form-control" id="salesUnitPrice" step="0.01" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveSales()">Save</button>
+            </div>
+        </div>
+    </div>
+</div>

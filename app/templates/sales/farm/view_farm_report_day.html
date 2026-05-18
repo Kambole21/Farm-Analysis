@@ -1,0 +1,636 @@
+{% extends 'sales_layout.html' %}
+{% block sales_content %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{url_for('static', filename='sales/sale_report.css')}}">
+
+<div class="container-fluid py-4">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div>
+      <h1 style="font-family:var(--font-display);font-size:2rem;color:var(--text-primary);margin:0 0 0.25rem;">Farm Report — {{ date }}</h1>
+      <p style="color:var(--text-secondary);margin:0;font-size:0.9rem;">Enter daily farm data for all sections</p>
+    </div>
+    <div style="display:flex;gap:0.75rem;align-items:center;">
+      <a href="{{ url_for('farm_report.farm_report') }}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back
+      </a>
+      <a href="{{ url_for('farm_report.farm_analysis') }}" class="btn btn-info">
+        <i class="fas fa-chart-line"></i> Analysis
+      </a>
+    </div>
+  </div>
+
+  <!-- Section 1: Poultry -->
+  <div class="card section-open">
+    <div class="card-header">
+      <span class="accent-dot"></span>
+      <h5>Poultry Updates</h5>
+      <span class="badge bg-secondary ms-2" id="poultryTotal">Total: 0.00</span>
+      <span class="section-number ms-auto">01</span>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-sm table-bordered" id="poultryTable">
+          <thead>
+            <tr><th>Poultry House #</th><th>Gross Profit</th><th>Damage Value</th><th>Net Production</th><th>Actions</th></tr>
+          </thead>
+          <tbody id="poultryTableBody">
+            {% for poultry in poultry_data %}
+            <tr data-house="{{ poultry.poultry_house }}">
+              <td>{{ poultry.poultry_house }}</td>
+              <td class="gross-profit">{{ poultry.gross_profit }}</td>
+              <td class="damage-value">{{ poultry.damage_value }}</td>
+              <td class="net-production">{{ poultry.net_production }}</td>
+              <td>
+                <button onclick="editPoultry('{{ poultry.poultry_house }}', {{ poultry.gross_profit }}, {{ poultry.damage_value }}, {{ poultry.net_production }})"
+                        class="btn btn-sm btn-primary" data-toggle="modal" data-target="#poultryModal">
+                  <i class="fas fa-edit"></i>
+                </button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+          <tfoot>
+            <tr>
+              <th>Total</th>
+              <th id="totalGross">0.00</th>
+              <th id="totalDamage">0.00</th>
+              <th id="totalNet">0.00</th>
+              <th>
+                <button onclick="addPoultryRow()" class="btn btn-sm btn-success" data-toggle="modal" data-target="#poultryModal">
+                  <i class="fas fa-plus"></i> Add
+                </button>
+              </th>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 2: Farm Sales -->
+  <div class="card section-cash">
+    <div class="card-header">
+      <span class="accent-dot"></span>
+      <h5>Farm Sales</h5>
+      <span class="badge bg-secondary ms-2" id="salesTotal">Total: 0.00</span>
+      <span class="section-number ms-auto">02</span>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-sm table-bordered" id="salesTable">
+          <thead>
+            <tr><th>Product Type</th><th>Quantity</th><th>Unit Price</th><th>Total Value</th><th>Actions</th></tr>
+          </thead>
+          <tbody id="salesTableBody">
+            {% for sale in sales_data %}
+            <tr data-product="{{ sale.product_type }}">
+              <td>{{ sale.product_type }}</td>
+              <td class="quantity">{{ sale.quantity }}</td>
+              <td class="unit-price">{{ sale.unit_price }}</td>
+              <td class="total-value">{{ sale.total_value }}</td>
+              <td>
+                <button onclick="editSales('{{ sale.product_type }}', {{ sale.quantity }}, {{ sale.unit_price }})"
+                        class="btn btn-sm btn-primary" data-toggle="modal" data-target="#salesModal">
+                  <i class="fas fa-edit"></i>
+                </button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+          <tfoot>
+            <tr class="table-info">
+              <th colspan="3">Total Sales</th>
+              <th id="totalSales">0.00</th>
+              <th>
+                <button onclick="addSalesRow()" class="btn btn-sm btn-success" data-toggle="modal" data-target="#salesModal">
+                  <i class="fas fa-plus"></i> Add
+                </button>
+              </th>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 3: Production -->
+  <div class="card section-credit">
+    <div class="card-header">
+      <span class="accent-dot"></span>
+      <h5>Production Collected</h5>
+      <span class="badge bg-secondary ms-2" id="productionTotal">Total: 0</span>
+      <span class="section-number ms-auto">03</span>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-sm table-bordered" id="productionTable">
+          <thead>
+            <tr><th>Product Type</th><th>Quantity</th><th>Actions</th></tr>
+          </thead>
+          <tbody id="productionTableBody">
+            {% for production in production_data %}
+            <tr data-product="{{ production.product_type }}">
+              <td>{{ production.product_type }}</td>
+              <td class="quantity">{{ production.quantity }}</td>
+              <td>
+                <button onclick="editProduction('{{ production.product_type }}', {{ production.quantity }})"
+                        class="btn btn-sm btn-primary" data-toggle="modal" data-target="#productionModal">
+                  <i class="fas fa-edit"></i>
+                </button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+          <tfoot>
+            <tr>
+              <th>Total Production</th>
+              <th id="totalProduction">0</th>
+              <th>
+                <button onclick="addProductionRow()" class="btn btn-sm btn-success" data-toggle="modal" data-target="#productionModal">
+                  <i class="fas fa-plus"></i> Add
+                </button>
+              </th>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 4: Feed -->
+  <div class="card section-exp">
+    <div class="card-header">
+      <span class="accent-dot"></span>
+      <h5>Feed Consumption</h5>
+      <span class="badge bg-secondary ms-2" id="feedTotal">Total Bags: 0</span>
+      <span class="section-number ms-auto">04</span>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-sm table-bordered" id="feedTable">
+          <thead>
+            <tr><th>Poultry House #</th><th>Feed Type</th><th>Bags Used</th><th>Actions</th></tr>
+          </thead>
+          <tbody id="feedTableBody">
+            {% for feed in feed_data %}
+            <tr data-house="{{ feed.poultry_house }}" data-feed="{{ feed.feed_type }}">
+              <td>{{ feed.poultry_house }}</td>
+              <td>{{ feed.feed_type }}</td>
+              <td class="bags-used">{{ feed.bags_used }}</td>
+              <td>
+                <button onclick="editFeed('{{ feed.poultry_house }}', '{{ feed.feed_type }}', {{ feed.bags_used }})"
+                        class="btn btn-sm btn-primary" data-toggle="modal" data-target="#feedModal">
+                  <i class="fas fa-edit"></i>
+                </button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+          <tfoot>
+            <tr class="table-danger">
+              <th colspan="2">Total Bags Used</th>
+              <th id="totalFeed">0</th>
+              <th>
+                <button onclick="addFeedRow()" class="btn btn-sm btn-success" data-toggle="modal" data-target="#feedModal">
+                  <i class="fas fa-plus"></i> Add
+                </button>
+              </th>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 5: Mortality -->
+  <div class="card section-bank">
+    <div class="card-header">
+      <span class="accent-dot"></span>
+      <h5>Mortality</h5>
+      <span class="badge bg-secondary ms-2" id="mortalityTotal">Total: 0</span>
+      <span class="section-number ms-auto">05</span>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-sm table-bordered" id="mortalityTable">
+          <thead>
+            <tr><th>Poultry House #</th><th>Mortality Count</th><th>Reason</th><th>Actions</th></tr>
+          </thead>
+          <tbody id="mortalityTableBody">
+            {% for mortality in mortality_data %}
+            <tr data-house="{{ mortality.poultry_house }}">
+              <td>{{ mortality.poultry_house }}</td>
+              <td class="mortality-count">{{ mortality.mortality_count }}</td>
+              <td>{{ mortality.mortality_reason }}</td>
+              <td>
+                <button onclick="editMortality('{{ mortality.poultry_house }}', {{ mortality.mortality_count }}, '{{ mortality.mortality_reason }}')"
+                        class="btn btn-sm btn-primary" data-toggle="modal" data-target="#mortalityModal">
+                  <i class="fas fa-edit"></i>
+                </button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+          <tfoot>
+            <tr>
+              <th>Total Mortality</th>
+              <th id="totalMortality">0</th>
+              <th colspan="2">
+                <button onclick="addMortalityRow()" class="btn btn-sm btn-success" data-toggle="modal" data-target="#mortalityModal">
+                  <i class="fas fa-plus"></i> Add
+                </button>
+              </th>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 6: Percentages -->
+  <div class="card section-farm">
+    <div class="card-header">
+      <span class="accent-dot"></span>
+      <h5>Percentages</h5>
+      <span class="section-number ms-auto">06</span>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-sm table-bordered" id="percentageTable">
+          <thead>
+            <tr><th>Poultry House #</th><th>Percentage Type</th><th>Value (%)</th><th>Actions</th></tr>
+          </thead>
+          <tbody id="percentageTableBody">
+            {% for percentage in percentage_data %}
+            <tr data-house="{{ percentage.poultry_house }}" data-type="{{ percentage.percentage_type }}">
+              <td>{{ percentage.poultry_house }}</td>
+              <td>{{ percentage.percentage_type }}</td>
+              <td class="percentage-value">{{ percentage.percentage_value }}</td>
+              <td>
+                <button onclick="editPercentage('{{ percentage.poultry_house }}', '{{ percentage.percentage_type }}', {{ percentage.percentage_value }})"
+                        class="btn btn-sm btn-primary" data-toggle="modal" data-target="#percentageModal">
+                  <i class="fas fa-edit"></i>
+                </button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+          <tfoot>
+            <tr>
+              <th colspan="3"></th>
+              <th>
+                <button onclick="addPercentageRow()" class="btn btn-sm btn-success" data-toggle="modal" data-target="#percentageModal">
+                  <i class="fas fa-plus"></i> Add
+                </button>
+              </th>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Daily Summary -->
+  <div class="card section-summary">
+    <div class="card-header">
+      <span class="accent-dot"></span>
+      <h5>Daily Summary</h5>
+    </div>
+    <div class="card-body">
+      <div class="summary-grid">
+        <div class="summary-block">
+          <h6>Production</h6>
+          <div class="summary-row">
+            <span>Total Net Production</span>
+            <span class="val"><span id="summaryNet">0.00</span></span>
+          </div>
+          <div class="summary-row total">
+            <span>Total Sales Value</span>
+            <span class="val"><span id="summarySales">0.00</span></span>
+          </div>
+        </div>
+        <div class="summary-block">
+          <h6>Health & Feed</h6>
+          <div class="summary-row">
+            <span>Total Mortality</span>
+            <span class="val"><span id="summaryMortality">0</span></span>
+          </div>
+          <div class="summary-row total">
+            <span>Feed Used (Bags)</span>
+            <span class="val"><span id="summaryFeed">0</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Modals -->
+<!-- Poultry Modal -->
+<div class="modal fade" id="poultryModal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title">Poultry Data</h5><button type="button" class="close" data-dismiss="modal"><span>&times;</span></button></div>
+      <div class="modal-body">
+        <form id="poultryForm">
+          <input type="hidden" id="poultryMode" value="add">
+          <input type="hidden" id="originalPoultryHouse" value="">
+          <div class="form-group mb-3"><label for="poultryHouse" class="form-label">Poultry House Number</label><input type="text" class="form-control" id="poultryHouse" required></div>
+          <div class="form-group mb-3"><label for="poultryGrossProfit" class="form-label">Gross Profit</label><input type="number" step="0.01" class="form-control" id="poultryGrossProfit" value="0" required></div>
+          <div class="form-group mb-3"><label for="poultryDamageValue" class="form-label">Damage Value</label><input type="number" step="0.01" class="form-control" id="poultryDamageValue" value="0" required></div>
+          <div class="form-group mb-3"><label for="poultryNetProduction" class="form-label">Net Production</label><input type="number" step="0.01" class="form-control" id="poultryNetProduction" value="0" required></div>
+        </form>
+      </div>
+      <div class="modal-footer"><button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button><button type="button" class="btn btn-primary" onclick="savePoultry()">Save</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- Sales Modal -->
+<div class="modal fade" id="salesModal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title">Sales Data</h5><button type="button" class="close" data-dismiss="modal"><span>&times;</span></button></div>
+      <div class="modal-body">
+        <form id="salesForm">
+          <input type="hidden" id="salesMode" value="add">
+          <input type="hidden" id="originalProductType" value="">
+          <div class="form-group mb-3">
+            <label for="salesProductType" class="form-label">Product Type</label>
+            <select class="form-control" id="salesProductType" required>
+              <option value="">Select Product Type</option>
+              <option>Eggs - Big</option><option>Eggs - White</option><option>Eggs - Medium</option>
+              <option>Eggs - Small</option><option>Eggs - Damaged</option><option>Tomatoes Box</option>
+              <option>Chicken Live</option><option>Chicken Dressed</option><option>Manure</option><option>Other</option>
+            </select>
+          </div>
+          <div class="form-group mb-3"><label for="salesQuantity" class="form-label">Quantity</label><input type="number" step="0.01" class="form-control" id="salesQuantity" value="0" required></div>
+          <div class="form-group mb-3"><label for="salesUnitPrice" class="form-label">Unit Price</label><input type="number" step="0.01" class="form-control" id="salesUnitPrice" value="0" required></div>
+        </form>
+      </div>
+      <div class="modal-footer"><button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button><button type="button" class="btn btn-primary" onclick="saveSales()">Save</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- Production Modal -->
+<div class="modal fade" id="productionModal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title">Production Data</h5><button type="button" class="close" data-dismiss="modal"><span>&times;</span></button></div>
+      <div class="modal-body">
+        <form id="productionForm">
+          <input type="hidden" id="productionMode" value="add">
+          <input type="hidden" id="originalProductionProductType" value="">
+          <div class="form-group mb-3">
+            <label for="productionProductType" class="form-label">Product Type</label>
+            <select class="form-control" id="productionProductType" required>
+              <option value="">Select Product Type</option>
+              <option>Eggs - Big</option><option>Eggs - White</option><option>Eggs - Medium</option>
+              <option>Eggs - Small</option><option>Eggs - Damaged</option><option>Tomatoes Box</option>
+              <option>Chicken Live</option><option>Chicken Dressed</option><option>Manure</option><option>Other</option>
+            </select>
+          </div>
+          <div class="form-group mb-3"><label for="productionQuantity" class="form-label">Quantity</label><input type="number" step="0.01" class="form-control" id="productionQuantity" value="0" required></div>
+        </form>
+      </div>
+      <div class="modal-footer"><button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button><button type="button" class="btn btn-primary" onclick="saveProduction()">Save</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- Feed Modal -->
+<div class="modal fade" id="feedModal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title">Feed Data</h5><button type="button" class="close" data-dismiss="modal"><span>&times;</span></button></div>
+      <div class="modal-body">
+        <form id="feedForm">
+          <input type="hidden" id="feedMode" value="add">
+          <input type="hidden" id="originalFeedPoultryHouse" value="">
+          <input type="hidden" id="originalFeedType" value="">
+          <div class="form-group mb-3"><label for="feedPoultryHouse" class="form-label">Poultry House Number</label><input type="text" class="form-control" id="feedPoultryHouse" required></div>
+          <div class="form-group mb-3">
+            <label for="feedType" class="form-label">Feed Type</label>
+            <select class="form-control" id="feedType" required>
+              <option value="">Select Feed Type</option>
+              <option>Starter</option><option>Grower</option><option>Finisher</option><option>Layer</option><option>Broiler</option>
+            </select>
+          </div>
+          <div class="form-group mb-3"><label for="feedBagsUsed" class="form-label">Bags Used</label><input type="number" step="0.01" class="form-control" id="feedBagsUsed" value="0" required></div>
+        </form>
+      </div>
+      <div class="modal-footer"><button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button><button type="button" class="btn btn-primary" onclick="saveFeed()">Save</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- Mortality Modal -->
+<div class="modal fade" id="mortalityModal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title">Mortality Data</h5><button type="button" class="close" data-dismiss="modal"><span>&times;</span></button></div>
+      <div class="modal-body">
+        <form id="mortalityForm">
+          <input type="hidden" id="mortalityMode" value="add">
+          <input type="hidden" id="originalMortalityPoultryHouse" value="">
+          <div class="form-group mb-3"><label for="mortalityPoultryHouse" class="form-label">Poultry House Number</label><input type="text" class="form-control" id="mortalityPoultryHouse" required></div>
+          <div class="form-group mb-3"><label for="mortalityCount" class="form-label">Mortality Count</label><input type="number" step="1" class="form-control" id="mortalityCount" value="0" required></div>
+          <div class="form-group mb-3"><label for="mortalityReason" class="form-label">Reason</label><input type="text" class="form-control" id="mortalityReason" placeholder="Optional"></div>
+        </form>
+      </div>
+      <div class="modal-footer"><button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button><button type="button" class="btn btn-primary" onclick="saveMortality()">Save</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- Percentage Modal -->
+<div class="modal fade" id="percentageModal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title">Percentage Data</h5><button type="button" class="close" data-dismiss="modal"><span>&times;</span></button></div>
+      <div class="modal-body">
+        <form id="percentageForm">
+          <input type="hidden" id="percentageMode" value="add">
+          <input type="hidden" id="originalPercentagePoultryHouse" value="">
+          <input type="hidden" id="originalPercentageType" value="">
+          <div class="form-group mb-3"><label for="percentagePoultryHouse" class="form-label">Poultry House Number</label><input type="text" class="form-control" id="percentagePoultryHouse" required></div>
+          <div class="form-group mb-3">
+            <label for="percentageType" class="form-label">Percentage Type</label>
+            <select class="form-control" id="percentageType" required>
+              <option value="">Select Type</option>
+              <option>Production</option><option>Mortality</option><option>Feed Efficiency</option><option>Other</option>
+            </select>
+          </div>
+          <div class="form-group mb-3"><label for="percentageValue" class="form-label">Percentage Value (%)</label><input type="number" step="0.01" class="form-control" id="percentageValue" value="0" required></div>
+        </form>
+      </div>
+      <div class="modal-footer"><button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button><button type="button" class="btn btn-primary" onclick="savePercentage()">Save</button></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const DATE = "{{ date }}";
+let currentPoultryHouse = null, currentProductType = null, currentFeedKey = null, currentMortalityHouse = null, currentPercentageKey = null;
+
+function loadReportData() {
+    fetch(`/api/get-report-data/${DATE}`)
+        .then(r => r.json())
+        .then(data => { updateTotals(data.totals); })
+        .catch(e => console.error('Error:', e));
+}
+
+function updateTotals(totals) {
+    document.getElementById('totalGross').textContent = totals.poultry.total_gross.toFixed(2);
+    document.getElementById('totalDamage').textContent = totals.poultry.total_damage.toFixed(2);
+    document.getElementById('totalNet').textContent = totals.poultry.total_net.toFixed(2);
+    document.getElementById('poultryTotal').textContent = `Total: ${totals.poultry.total_net.toFixed(2)}`;
+    document.getElementById('totalSales').textContent = totals.sales.toFixed(2);
+    document.getElementById('salesTotal').textContent = `Total: ${totals.sales.toFixed(2)}`;
+    document.getElementById('totalProduction').textContent = totals.production;
+    document.getElementById('productionTotal').textContent = `Total: ${totals.production}`;
+    document.getElementById('totalFeed').textContent = totals.feed;
+    document.getElementById('feedTotal').textContent = `Total Bags: ${totals.feed}`;
+    document.getElementById('totalMortality').textContent = totals.mortality;
+    document.getElementById('mortalityTotal').textContent = `Total: ${totals.mortality}`;
+    document.getElementById('summaryNet').textContent = totals.poultry.total_net.toFixed(2);
+    document.getElementById('summarySales').textContent = totals.sales.toFixed(2);
+    document.getElementById('summaryMortality').textContent = totals.mortality;
+    document.getElementById('summaryFeed').textContent = totals.feed;
+}
+
+function calculatePoultryTotals() {
+    let tG=0,tD=0,tN=0;
+    document.querySelectorAll('#poultryTableBody tr').forEach(r => {
+        tG += parseFloat(r.querySelector('.gross-profit')?.textContent||0);
+        tD += parseFloat(r.querySelector('.damage-value')?.textContent||0);
+        tN += parseFloat(r.querySelector('.net-production')?.textContent||0);
+    });
+    document.getElementById('totalGross').textContent=tG.toFixed(2);
+    document.getElementById('totalDamage').textContent=tD.toFixed(2);
+    document.getElementById('totalNet').textContent=tN.toFixed(2);
+    document.getElementById('poultryTotal').textContent=`Total: ${tN.toFixed(2)}`;
+    return {totalGross:tG,totalDamage:tD,totalNet:tN};
+}
+function calculateSalesTotals() {
+    let t=0; document.querySelectorAll('#salesTableBody tr').forEach(r=>{ t+=parseFloat(r.querySelector('.total-value')?.textContent||0); });
+    document.getElementById('totalSales').textContent=t.toFixed(2); document.getElementById('salesTotal').textContent=`Total: ${t.toFixed(2)}`; return t;
+}
+function calculateFeedTotals() {
+    let t=0; document.querySelectorAll('#feedTableBody tr').forEach(r=>{ t+=parseFloat(r.querySelector('.bags-used')?.textContent||0); });
+    document.getElementById('totalFeed').textContent=t; document.getElementById('feedTotal').textContent=`Total Bags: ${t}`; return t;
+}
+function calculateMortalityTotals() {
+    let t=0; document.querySelectorAll('#mortalityTableBody tr').forEach(r=>{ t+=parseInt(r.querySelector('.mortality-count')?.textContent||0); });
+    document.getElementById('totalMortality').textContent=t; document.getElementById('mortalityTotal').textContent=`Total: ${t}`; return t;
+}
+function updateSummaryFromCalculations() {
+    const p=calculatePoultryTotals(), s=calculateSalesTotals(), m=calculateMortalityTotals(), f=calculateFeedTotals();
+    document.getElementById('summaryNet').textContent=p.totalNet.toFixed(2);
+    document.getElementById('summarySales').textContent=s.toFixed(2);
+    document.getElementById('summaryMortality').textContent=m;
+    document.getElementById('summaryFeed').textContent=f;
+}
+
+function addPoultryRow() { document.getElementById('poultryMode').value='add'; document.getElementById('originalPoultryHouse').value=''; document.getElementById('poultryHouse').value=''; document.getElementById('poultryGrossProfit').value='0'; document.getElementById('poultryDamageValue').value='0'; document.getElementById('poultryNetProduction').value='0'; document.getElementById('poultryHouse').readOnly=false; $('#poultryModal').modal('show'); }
+function editPoultry(h,g,d,n) { document.getElementById('poultryMode').value='edit'; document.getElementById('originalPoultryHouse').value=h; currentPoultryHouse=h; document.getElementById('poultryHouse').value=h; document.getElementById('poultryGrossProfit').value=g; document.getElementById('poultryDamageValue').value=d; document.getElementById('poultryNetProduction').value=n; document.getElementById('poultryHouse').readOnly=true; $('#poultryModal').modal('show'); }
+function savePoultry() {
+    const h=document.getElementById('poultryHouse').value, g=parseFloat(document.getElementById('poultryGrossProfit').value)||0, d=parseFloat(document.getElementById('poultryDamageValue').value)||0, n=parseFloat(document.getElementById('poultryNetProduction').value)||0;
+    if (!h) { alert('Please enter poultry house number'); return; }
+    const fd=new FormData(); fd.append('date',DATE); fd.append('poultry_house',h); fd.append('gross_profit',g); fd.append('damage_value',d); fd.append('net_production',n);
+    fetch('/api/update-poultry',{method:'POST',body:fd}).then(r=>r.json()).then(data=>{
+        if(data.success){ $('#poultryModal').modal('hide'); const mode=document.getElementById('poultryMode').value, orig=document.getElementById('originalPoultryHouse').value;
+            if(mode==='add'){ const tb=document.getElementById('poultryTableBody'); const nr=document.createElement('tr'); nr.setAttribute('data-house',h); nr.innerHTML=`<td>${h}</td><td class="gross-profit">${g.toFixed(2)}</td><td class="damage-value">${d.toFixed(2)}</td><td class="net-production">${n.toFixed(2)}</td><td><button onclick="editPoultry('${h}',${g},${d},${n})" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#poultryModal"><i class="fas fa-edit"></i></button></td>`; tb.appendChild(nr); }
+            else { const row=document.querySelector(`#poultryTableBody tr[data-house="${orig}"]`); if(row){ row.cells[1].textContent=g.toFixed(2); row.cells[2].textContent=d.toFixed(2); row.cells[3].textContent=n.toFixed(2); } }
+            updateSummaryFromCalculations();
+        } else { alert('Error updating poultry data'); }
+    }).catch(()=>alert('An error occurred.'));
+}
+
+function addSalesRow() { document.getElementById('salesMode').value='add'; document.getElementById('originalProductType').value=''; document.getElementById('salesProductType').value=''; document.getElementById('salesQuantity').value='0'; document.getElementById('salesUnitPrice').value='0'; $('#salesModal').modal('show'); }
+function editSales(p,q,u) { document.getElementById('salesMode').value='edit'; document.getElementById('originalProductType').value=p; currentProductType=p; document.getElementById('salesProductType').value=p; document.getElementById('salesQuantity').value=q; document.getElementById('salesUnitPrice').value=u; $('#salesModal').modal('show'); }
+function saveSales() {
+    const p=document.getElementById('salesProductType').value, q=parseFloat(document.getElementById('salesQuantity').value)||0, u=parseFloat(document.getElementById('salesUnitPrice').value)||0, t=q*u;
+    if(!p){alert('Please select product type');return;}
+    const fd=new FormData(); fd.append('date',DATE); fd.append('product_type',p); fd.append('quantity',q); fd.append('unit_price',u);
+    fetch('/api/update-sales',{method:'POST',body:fd}).then(r=>r.json()).then(data=>{
+        if(data.success){ $('#salesModal').modal('hide'); const mode=document.getElementById('salesMode').value, orig=document.getElementById('originalProductType').value;
+            if(mode==='add'){ const tb=document.getElementById('salesTableBody'); const nr=document.createElement('tr'); nr.setAttribute('data-product',p); nr.innerHTML=`<td>${p}</td><td class="quantity">${q}</td><td class="unit-price">${u}</td><td class="total-value">${t.toFixed(2)}</td><td><button onclick="editSales('${p}',${q},${u})" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#salesModal"><i class="fas fa-edit"></i></button></td>`; tb.appendChild(nr); }
+            else { const row=document.querySelector(`#salesTableBody tr[data-product="${orig}"]`); if(row){ row.cells[1].textContent=q; row.cells[2].textContent=u; row.cells[3].textContent=t.toFixed(2); } }
+            updateSummaryFromCalculations();
+        } else { alert('Error updating sales data'); }
+    }).catch(()=>alert('An error occurred.'));
+}
+
+function addProductionRow() { document.getElementById('productionMode').value='add'; document.getElementById('originalProductionProductType').value=''; document.getElementById('productionProductType').value=''; document.getElementById('productionQuantity').value='0'; $('#productionModal').modal('show'); }
+function editProduction(p,q) { document.getElementById('productionMode').value='edit'; document.getElementById('originalProductionProductType').value=p; document.getElementById('productionProductType').value=p; document.getElementById('productionQuantity').value=q; $('#productionModal').modal('show'); }
+function saveProduction() {
+    const p=document.getElementById('productionProductType').value, q=parseFloat(document.getElementById('productionQuantity').value)||0;
+    if(!p){alert('Please select product type');return;}
+    const fd=new FormData(); fd.append('date',DATE); fd.append('product_type',p); fd.append('quantity',q);
+    fetch('/api/update-production',{method:'POST',body:fd}).then(r=>r.json()).then(data=>{
+        if(data.success){ $('#productionModal').modal('hide'); const mode=document.getElementById('productionMode').value, orig=document.getElementById('originalProductionProductType').value;
+            if(mode==='add'){ const tb=document.getElementById('productionTableBody'); const nr=document.createElement('tr'); nr.setAttribute('data-product',p); nr.innerHTML=`<td>${p}</td><td class="quantity">${q}</td><td><button onclick="editProduction('${p}',${q})" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#productionModal"><i class="fas fa-edit"></i></button></td>`; tb.appendChild(nr); }
+            else { const row=document.querySelector(`#productionTableBody tr[data-product="${orig}"]`); if(row){ row.cells[1].textContent=q; } }
+            updateSummaryFromCalculations();
+        } else { alert('Error updating production data'); }
+    }).catch(()=>alert('An error occurred.'));
+}
+
+function addFeedRow() { document.getElementById('feedMode').value='add'; document.getElementById('originalFeedPoultryHouse').value=''; document.getElementById('originalFeedType').value=''; document.getElementById('feedPoultryHouse').value=''; document.getElementById('feedType').value=''; document.getElementById('feedBagsUsed').value='0'; $('#feedModal').modal('show'); }
+function editFeed(h,ft,b) { document.getElementById('feedMode').value='edit'; document.getElementById('originalFeedPoultryHouse').value=h; document.getElementById('originalFeedType').value=ft; document.getElementById('feedPoultryHouse').value=h; document.getElementById('feedType').value=ft; document.getElementById('feedBagsUsed').value=b; $('#feedModal').modal('show'); }
+function saveFeed() {
+    const h=document.getElementById('feedPoultryHouse').value, ft=document.getElementById('feedType').value, b=parseFloat(document.getElementById('feedBagsUsed').value)||0;
+    if(!h){alert('Please enter poultry house number');return;} if(!ft){alert('Please select feed type');return;}
+    const fd=new FormData(); fd.append('date',DATE); fd.append('poultry_house',h); fd.append('feed_type',ft); fd.append('bags_used',b);
+    fetch('/api/update-feed',{method:'POST',body:fd}).then(r=>r.json()).then(data=>{
+        if(data.success){ $('#feedModal').modal('hide'); const mode=document.getElementById('feedMode').value, oh=document.getElementById('originalFeedPoultryHouse').value, oft=document.getElementById('originalFeedType').value;
+            if(mode==='add'){ const tb=document.getElementById('feedTableBody'); const nr=document.createElement('tr'); nr.setAttribute('data-house',h); nr.setAttribute('data-feed',ft); nr.innerHTML=`<td>${h}</td><td>${ft}</td><td class="bags-used">${b}</td><td><button onclick="editFeed('${h}','${ft}',${b})" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#feedModal"><i class="fas fa-edit"></i></button></td>`; tb.appendChild(nr); }
+            else { const row=document.querySelector(`#feedTableBody tr[data-house="${oh}"][data-feed="${oft}"]`); if(row){ row.cells[2].textContent=b; } }
+            updateSummaryFromCalculations();
+        } else { alert('Error updating feed data'); }
+    }).catch(()=>alert('An error occurred.'));
+}
+
+function addMortalityRow() { document.getElementById('mortalityMode').value='add'; document.getElementById('originalMortalityPoultryHouse').value=''; document.getElementById('mortalityPoultryHouse').value=''; document.getElementById('mortalityCount').value='0'; document.getElementById('mortalityReason').value=''; $('#mortalityModal').modal('show'); }
+function editMortality(h,c,r) { document.getElementById('mortalityMode').value='edit'; document.getElementById('originalMortalityPoultryHouse').value=h; currentMortalityHouse=h; document.getElementById('mortalityPoultryHouse').value=h; document.getElementById('mortalityCount').value=c; document.getElementById('mortalityReason').value=r; $('#mortalityModal').modal('show'); }
+function saveMortality() {
+    const h=document.getElementById('mortalityPoultryHouse').value, c=parseInt(document.getElementById('mortalityCount').value)||0, r=document.getElementById('mortalityReason').value;
+    if(!h){alert('Please enter poultry house number');return;}
+    const fd=new FormData(); fd.append('date',DATE); fd.append('poultry_house',h); fd.append('mortality_count',c); fd.append('mortality_reason',r);
+    fetch('/api/update-mortality',{method:'POST',body:fd}).then(res=>res.json()).then(data=>{
+        if(data.success){ $('#mortalityModal').modal('hide'); const mode=document.getElementById('mortalityMode').value, oh=document.getElementById('originalMortalityPoultryHouse').value;
+            if(mode==='add'){ const tb=document.getElementById('mortalityTableBody'); const nr=document.createElement('tr'); nr.setAttribute('data-house',h); nr.innerHTML=`<td>${h}</td><td class="mortality-count">${c}</td><td>${r||''}</td><td><button onclick="editMortality('${h}',${c},'${r}')" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#mortalityModal"><i class="fas fa-edit"></i></button></td>`; tb.appendChild(nr); }
+            else { const row=document.querySelector(`#mortalityTableBody tr[data-house="${oh}"]`); if(row){ row.cells[1].textContent=c; row.cells[2].textContent=r||''; } }
+            updateSummaryFromCalculations();
+        } else { alert('Error updating mortality data'); }
+    }).catch(()=>alert('An error occurred.'));
+}
+
+function addPercentageRow() { document.getElementById('percentageMode').value='add'; document.getElementById('originalPercentagePoultryHouse').value=''; document.getElementById('originalPercentageType').value=''; document.getElementById('percentagePoultryHouse').value=''; document.getElementById('percentageType').value=''; document.getElementById('percentageValue').value='0'; $('#percentageModal').modal('show'); }
+function editPercentage(h,pt,pv) { document.getElementById('percentageMode').value='edit'; document.getElementById('originalPercentagePoultryHouse').value=h; document.getElementById('originalPercentageType').value=pt; document.getElementById('percentagePoultryHouse').value=h; document.getElementById('percentageType').value=pt; document.getElementById('percentageValue').value=pv; $('#percentageModal').modal('show'); }
+function savePercentage() {
+    const h=document.getElementById('percentagePoultryHouse').value, pt=document.getElementById('percentageType').value, pv=parseFloat(document.getElementById('percentageValue').value)||0;
+    if(!h){alert('Please enter poultry house number');return;} if(!pt){alert('Please select percentage type');return;}
+    const fd=new FormData(); fd.append('date',DATE); fd.append('poultry_house',h); fd.append('percentage_type',pt); fd.append('percentage_value',pv);
+    fetch('/api/update-percentage',{method:'POST',body:fd}).then(r=>r.json()).then(data=>{
+        if(data.success){ $('#percentageModal').modal('hide'); const mode=document.getElementById('percentageMode').value, oh=document.getElementById('originalPercentagePoultryHouse').value, ot=document.getElementById('originalPercentageType').value;
+            if(mode==='add'){ const tb=document.getElementById('percentageTableBody'); const nr=document.createElement('tr'); nr.setAttribute('data-house',h); nr.setAttribute('data-type',pt); nr.innerHTML=`<td>${h}</td><td>${pt}</td><td class="percentage-value">${pv}</td><td><button onclick="editPercentage('${h}','${pt}',${pv})" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#percentageModal"><i class="fas fa-edit"></i></button></td>`; tb.appendChild(nr); }
+            else { const row=document.querySelector(`#percentageTableBody tr[data-house="${oh}"][data-type="${ot}"]`); if(row){ row.cells[2].textContent=pv; } }
+        } else { alert('Error updating percentage data'); }
+    }).catch(()=>alert('An error occurred.'));
+}
+
+$('.modal').on('hidden.bs.modal', function() { currentPoultryHouse=currentProductType=currentFeedKey=currentMortalityHouse=currentPercentageKey=null; });
+document.addEventListener('DOMContentLoaded', function() { loadReportData(); updateSummaryFromCalculations(); });
+</script>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+{% endblock %}

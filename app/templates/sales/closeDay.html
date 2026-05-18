@@ -1,0 +1,26 @@
+<!-- Close Day Confirmation Modal -->
+<div class="modal fade" id="closeDayModal" tabindex="-1" aria-labelledby="closeDayModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="background: transparent;">
+            <div class="modal-body">
+                
+                <div class="alert alert-warning">
+                    <i class="fas fa-lock me-2"></i>
+                    <strong>Warning:</strong> This action cannot be undone. Once closed, you cannot modify sales for this day.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>
+                    Cancel
+                </button>
+                <form id="closeDayFormModal" method="POST" action="{{ url_for('sales.close_day') }}" class="d-inline">
+                    <button type="submit" class="btn btn-warning" id="confirmCloseBtn">
+                        <i class="fas fa-check-circle me-1"></i>
+                        Yes, Close Day
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

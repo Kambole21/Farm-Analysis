@@ -1,0 +1,735 @@
+{% extends 'sales_layout.html' %}
+{% block sales_content %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{url_for('static', filename='sales/sale_report.css')}}">
+<link rel="stylesheet" href="{{url_for('static', filename='sales/cards.css')}}">
+<div class="container-fluid py-4">
+
+  <!-- Day Management -->
+<div class="card section-day">
+    <div class="card-header">
+      <span class="accent-dot"></span>
+      <h5>Day Management</h5>
+    </div>
+    <div class="card-body">
+      {% if not active_date %}
+      <form method="POST" action="{{ url_for('sales.start_day') }}" class="row g-3">
+        <div class="col-md-6">
+          <label for="date" class="form-label">Select Date</label>
+          <input type="text" class="form-control" id="date" name="date" required
+                 value="{{ today }}" max="{{ today }}">
+        </div>
+        <div class="col-md-6 d-flex align-items-end">
+          <button type="submit" class="btn btn-play">
+            <img src="{{url_for('static', filename='icons/play.svg')}}" alt="" style="width:14px;height:14px;filter:invert(1);margin-right:6px;vertical-align:middle;">
+            Start Day
+          </button>
+        </div>
+      </form>
+      {% else %}
+      <div class="active-day-banner">
+        <div>
+          <div class="day-label">📅 {{ active_date }}</div>
+          <p>Record sales and transactions for this day</p>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+          <span class="status-pill">Active</span>
+          <button type="button" onclick="showCloseDayModal()" class="btn btn-secondary btn-sm"
+                  data-bs-toggle="modal" data-bs-target="#closeDayModal">
+            <img src="{{url_for('static', filename='icons/pause.svg')}}" alt="" style="width:14px;height:14px;filter:invert(0.6);margin-right:4px;vertical-align:middle;">
+            Close Day
+          </button>
+        </div>
+      </div>
+      {% endif %}
+
+      <div class="select-day-row">
+        <form method="POST" action="{{ url_for('sales.select_day') }}" class="d-flex gap-3 align-items-end w-100">
+          <div class="flex-grow-1">
+            <label for="existing-date" class="form-label">View Existing Day</label>
+            <select class="form-select" id="existing-date" name="date">
+              <option value="">Select a date...</option>
+              {% for date_item in dates %}
+              <option value="{{ date_item.date }}">{{ date_item.date }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <button type="submit" class="btn btn-secondary">View Inputs</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  {% if active_date %}
+
+  <!-- 1. Opening Stock -->
+  <div class="card section-open">
+    <div class="card-header">
+      <span class="accent-dot"></span>
+      <h5>Opening Stock</h5>
+      <span class="section-number ms-auto">01</span>
+    </div>
+    <div class="card-body">
+      <form id="openingStockForm" class="row g-3">
+        <div class="col-md-3">
+          <label for="productType" class="form-label">Product Type</label>
+          <select class="form-select" id="productType" name="product_type" required>
+            <option value="">Select product...</option>
+            {% for key, product in product_types.items() %}
+            <option value="{{ key }}">{{ product.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label for="section" class="form-label">Section</label>
+          <select class="form-select" id="section" name="section" required>
+            <option value="">Select section...</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <label for="quantity" class="form-label">Quantity</label>
+          <input type="number" step="0.01" class="form-control" id="quantity" name="quantity" required>
+        </div>
+        <div class="col-md-2">
+          <label for="unitPrice" class="form-label">Unit Price (K)</label>
+          <input type="number" step="0.01" class="form-control" id="unitPrice" name="unit_price" required>
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+          <button type="submit" class="btn btn-primary w-100">Add Stock</button>
+        </div>
+      </form>
+      <div class="subsection-label">Recorded Opening Stock</div>
+      <div class="table-responsive">
+        <table class="table table-sm table-bordered">
+          <thead><tr>
+            <th>Product</th><th>Section</th><th>Quantity</th><th>Unit Price</th><th>Total Value</th>
+          </tr></thead>
+          <tbody id="openingStockTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Cash Sales -->
+  <div class="card section-cash">
+    <div class="card-header">
+      <span class="accent-dot"></span>
+      <h5>Cash Sales / Revenue</h5>
+      <span class="section-number ms-auto">02</span>
+    </div>
+    <div class="card-body">
+      <form id="cashSaleForm" class="row g-3">
+        <div class="col-md-6">
+          <label for="saleName" class="form-label">Revenue Name</label>
+          <input type="text" class="form-control" id="saleName" name="sale_name"
+                 placeholder="e.g., Eggs Sales, Chicken Sales" required>
+        </div>
+        <div class="col-md-4">
+          <label for="amount" class="form-label">Amount (K)</label>
+          <input type="number" step="0.01" class="form-control" id="amount" name="amount" required>
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+          <button type="submit" class="btn btn-success w-100">Add Revenue</button>
+        </div>
+      </form>
+      <div class="subsection-label">Recorded Cash Sales</div>
+      <div class="table-responsive">
+        <table class="table table-sm table-bordered">
+          <thead><tr><th>Revenue Name</th><th>Amount (K)</th><th>Time</th></tr></thead>
+          <tbody id="cashSalesTable"></tbody>
+          <tfoot><tr class="table-info">
+            <th>Total Revenue</th><th id="totalCashSales">0.00</th><th></th>
+          </tr></tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Credit Sales -->
+  <div class="card section-credit">
+    <div class="card-header">
+      <span class="accent-dot"></span>
+      <h5>Credit Sales</h5>
+      <span class="section-number ms-auto">03</span>
+    </div>
+    <div class="card-body">
+      <form id="creditSaleForm" class="row g-3">
+        <div class="col-md-3">
+          <label for="creditHolder" class="form-label">Credit Holder</label>
+          <input type="text" class="form-control" id="creditHolder" name="credit_holder" required>
+        </div>
+        <div class="col-md-2">
+          <label for="creditProductType" class="form-label">Product</label>
+          <select class="form-select" id="creditProductType" name="product_type" required>
+            <option value="">Select...</option>
+            {% for key, product in product_types.items() %}
+            <option value="{{ key }}">{{ product.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-2">
+          <label for="creditSection" class="form-label">Section</label>
+          <select class="form-select" id="creditSection" name="section" required>
+            <option value="">Select...</option>
+          </select>
+        </div>
+        <div class="col-md-1">
+          <label for="creditQuantity" class="form-label">Qty</label>
+          <input type="number" step="0.01" class="form-control" id="creditQuantity" name="quantity" required>
+        </div>
+        <div class="col-md-2">
+          <label for="creditUnitPrice" class="form-label">Unit Price (K)</label>
+          <input type="number" step="0.01" class="form-control" id="creditUnitPrice" name="unit_price" required>
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+          <button type="submit" class="btn btn-warning w-100">Add Credit</button>
+        </div>
+      </form>
+      <div class="subsection-label">Recorded Credit Sales</div>
+      <div class="table-responsive">
+        <table class="table table-sm table-bordered">
+          <thead><tr>
+            <th>Credit Holder</th><th>Product</th><th>Section</th><th>Qty</th><th>Unit Price</th><th>Total</th>
+          </tr></thead>
+          <tbody id="creditSalesTable"></tbody>
+          <tfoot><tr class="table-warning">
+            <th colspan="5">Total Credit Sales</th><th id="totalCreditSales">0.00</th>
+          </tr></tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Expenses -->
+  <div class="card section-exp">
+    <div class="card-header">
+      <span class="accent-dot"></span>
+      <h5>Expenses</h5>
+      <span class="section-number ms-auto">04</span>
+    </div>
+    <div class="card-body">
+      <form id="expenseForm" class="row g-3">
+        <div class="col-md-6">
+          <label for="expenseDescription" class="form-label">Description</label>
+          <input type="text" class="form-control" id="expenseDescription" name="description"
+                 placeholder="e.g., Feed purchase, Transport, Wages" required>
+        </div>
+        <div class="col-md-4">
+          <label for="expenseAmount" class="form-label">Amount (K)</label>
+          <input type="number" step="0.01" class="form-control" id="expenseAmount" name="amount" required>
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+          <button type="submit" class="btn btn-danger w-100">Add Expense</button>
+        </div>
+      </form>
+      <div class="subsection-label">Recorded Expenses</div>
+      <div class="table-responsive">
+        <table class="table table-sm table-bordered">
+          <thead><tr><th>Description</th><th>Amount (K)</th><th>Time</th></tr></thead>
+          <tbody id="expensesTable"></tbody>
+          <tfoot><tr class="table-danger">
+            <th>Total Expenses</th><th id="totalExpenses">0.00</th><th></th>
+          </tr></tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Bank Deposit -->
+  <div class="card section-bank">
+    <div class="card-header">
+      <span class="accent-dot"></span>
+      <h5>Bank Deposit</h5>
+      <span class="section-number ms-auto">05</span>
+    </div>
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-4">
+          <form id="expectedDepositForm">
+            <div class="deposit-card deposit-expected">
+              <h6>Expected Deposit</h6>
+              <label for="expectedAmount" class="form-label">Amount (K)</label>
+              <input type="number" step="0.01" class="form-control" id="expectedAmount" name="amount" required>
+              <button type="submit" class="btn btn-secondary w-100 mt-3">Set Expected</button>
+              <span class="current-val" id="currentExpected">0.00</span>
+            </div>
+          </form>
+        </div>
+        <div class="col-md-4">
+          <form id="actualDepositForm">
+            <div class="deposit-card deposit-actual">
+              <h6>Actual Deposit</h6>
+              <label for="actualAmount" class="form-label">Amount (K)</label>
+              <input type="number" step="0.01" class="form-control" id="actualAmount" name="amount" required>
+              <button type="submit" class="btn btn-secondary w-100 mt-3">Set Actual</button>
+              <span class="current-val" id="currentActual">0.00</span>
+            </div>
+          </form>
+        </div>
+        <div class="col-md-4">
+          <form id="cashOnHandForm">
+            <div class="deposit-card deposit-hand">
+              <h6>Cash on Hand</h6>
+              <label for="cashOnHandAmount" class="form-label">Amount (K)</label>
+              <input type="number" step="0.01" class="form-control" id="cashOnHandAmount" name="amount" required>
+              <button type="submit" class="btn btn-secondary w-100 mt-3">Set Cash on Hand</button>
+              <span class="current-val" id="currentCashOnHand">0.00</span>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. Closing Stock -->
+  <div class="card section-close">
+    <div class="card-header">
+      <span class="accent-dot"></span>
+      <h5>Closing Stock</h5>
+      <span class="section-number ms-auto">06</span>
+    </div>
+    <div class="card-body">
+      <form id="closingStockForm" class="row g-3">
+        <div class="col-md-3">
+          <label for="closingProductType" class="form-label">Product Type</label>
+          <select class="form-select" id="closingProductType" name="product_type" required>
+            <option value="">Select product...</option>
+            {% for key, product in product_types.items() %}
+            <option value="{{ key }}">{{ product.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label for="closingSection" class="form-label">Section</label>
+          <select class="form-select" id="closingSection" name="section" required>
+            <option value="">Select section...</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label for="closingQuantity" class="form-label">Remaining Quantity</label>
+          <input type="number" step="0.01" class="form-control" id="closingQuantity" name="quantity" required>
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+          <button type="submit" class="btn btn-secondary w-100">Add Closing</button>
+        </div>
+      </form>
+      <div class="subsection-label">Closing Stock</div>
+      <div class="table-responsive">
+        <table class="table table-sm table-bordered">
+          <thead><tr><th>Product</th><th>Section</th><th>Remaining Qty</th></tr></thead>
+          <tbody id="closingStockTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. Credits to Farm -->
+  <div class="card section-farm">
+    <div class="card-header">
+      <span class="accent-dot"></span>
+      <h5>Credits to the Farm</h5>
+      <span class="section-number ms-auto">07</span>
+    </div>
+    <div class="card-body">
+      <form id="farmCreditForm" class="row g-3">
+        <div class="col-md-4">
+          <label for="creditorName" class="form-label">Creditor Name / Company</label>
+          <input type="text" class="form-control" id="creditorName" name="creditor_name" required>
+        </div>
+        <div class="col-md-4">
+          <label for="creditDescription" class="form-label">Description</label>
+          <input type="text" class="form-control" id="creditDescription" name="description"
+                 placeholder="e.g., Credit for feed" required>
+        </div>
+        <div class="col-md-2">
+          <label for="creditAmount" class="form-label">Amount (K)</label>
+          <input type="number" step="0.01" class="form-control" id="creditAmount" name="amount" required>
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+          <button type="submit" class="btn btn-dark w-100">Add Credit</button>
+        </div>
+      </form>
+      <div class="subsection-label">Credits Owed to Farm</div>
+      <div class="table-responsive">
+        <table class="table table-sm table-bordered">
+          <thead><tr><th>Creditor</th><th>Description</th><th>Amount (K)</th><th>Time</th></tr></thead>
+          <tbody id="farmCreditsTable"></tbody>
+          <tfoot><tr class="table-dark">
+            <th colspan="2">Total Credits Owed</th><th id="totalFarmCredits">0.00</th><th></th>
+          </tr></tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  {% include 'sales/closeDay.html' %}
+
+  <!-- Day Summary -->
+  <div class="card section-summary">
+    <div class="card-header">
+      <span class="accent-dot"></span>
+      <h5>Day Summary</h5>
+    </div>
+    <div class="card-body">
+      <div class="summary-grid">
+        <div class="summary-block">
+          <h6>Income</h6>
+          <div class="summary-row">
+            <span>Total Cash Sales</span>
+            <span class="val"><span id="summaryCashSales">0.00</span> K</span>
+          </div>
+          <div class="summary-row">
+            <span>Total Credit Sales</span>
+            <span class="val"><span id="summaryCreditSales">0.00</span> K</span>
+          </div>
+          <div class="summary-row total">
+            <span>Gross Income</span>
+            <span class="val"><span id="summaryGrossIncome">0.00</span> K</span>
+          </div>
+        </div>
+        <div class="summary-block">
+          <h6>Outgoings & Deposits</h6>
+          <div class="summary-row">
+            <span>Total Expenses</span>
+            <span class="val"><span id="summaryExpenses">0.00</span> K</span>
+          </div>
+          <div class="summary-row">
+            <span>Expected Deposit</span>
+            <span class="val"><span id="summaryExpectedDeposit">0.00</span> K</span>
+          </div>
+          <div class="summary-row">
+            <span>Actual Deposit</span>
+            <span class="val"><span id="summaryActualDeposit">0.00</span> K</span>
+          </div>
+          <div class="summary-row total">
+            <span>Cash on Hand</span>
+            <span class="val"><span id="summaryCashOnHand">0.00</span> K</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="net-result-bar">
+        <div>
+          <div class="label">Net Result</div>
+          <div class="equation">Gross Income − Expenses = <strong id="summaryNetProfit">0.00</strong> K</div>
+        </div>
+        <span id="profitLossBadge" class="badge bg-secondary">Calculating...</span>
+      </div>
+    </div>
+  </div>
+
+  {% endif %}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+const PRODUCT_TYPES = {
+    eggs: { name: 'Eggs', units: 'tray' },
+    chicken: { name: 'Chicken', units: 'kg' },
+    feed: { name: 'Animal Feed', units: 'bag' }
+};
+const productSections = {
+    {% for key, product in product_types.items() %}
+    '{{ key }}': {{ product.sections|tojson }},
+    {% endfor %}
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+    const today = new Date().toISOString().split('T')[0];
+    const dateInput = document.getElementById('date');
+    if (dateInput) { dateInput.value = today; dateInput.max = today; }
+    initializeProductSelects();
+    {% if active_date %}
+    loadDayData('{{ active_date }}');
+    {% endif %}
+});
+
+function initializeProductSelects() {
+    const map = [
+        ['productType', 'section'],
+        ['creditProductType', 'creditSection'],
+        ['closingProductType', 'closingSection']
+    ];
+    map.forEach(([src, tgt]) => {
+        const el = document.getElementById(src);
+        if (el) el.addEventListener('change', function() { updateSections(this.value, tgt); });
+    });
+}
+
+function updateSections(productType, targetSelectId) {
+    const sectionSelect = document.getElementById(targetSelectId);
+    if (sectionSelect && productSections[productType]) {
+        sectionSelect.innerHTML = '<option value="">Select section...</option>';
+        productSections[productType].forEach(section => {
+            const option = document.createElement('option');
+            option.value = section.toLowerCase();
+            option.textContent = section;
+            sectionSelect.appendChild(option);
+        });
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const forms = [
+        ['openingStockForm', '/add-opening-stock', 'openingStockTable', updateOpeningStockTable],
+        ['cashSaleForm', '/add-cash-sale', 'cashSalesTable', updateCashSalesTable],
+        ['creditSaleForm', '/add-credit-sale', 'creditSalesTable', updateCreditSalesTable],
+        ['expenseForm', '/add-expense', 'expensesTable', updateExpensesTable],
+        ['closingStockForm', '/add-closing-stock', 'closingStockTable', updateClosingStockTable],
+        ['farmCreditForm', '/add-farm-credit', 'farmCreditsTable', updateFarmCreditsTable],
+    ];
+    forms.forEach(([id, endpoint, tableId, fn]) => {
+        const form = document.getElementById(id);
+        if (form) form.addEventListener('submit', function(e) { e.preventDefault(); submitForm(this, endpoint, tableId, fn); });
+    });
+
+    ['expectedDepositForm','actualDepositForm'].forEach((id, i) => {
+        const form = document.getElementById(id);
+        if (form) form.addEventListener('submit', function(e) { e.preventDefault(); submitBankDeposit(this, i === 0 ? 'expected' : 'actual'); });
+    });
+
+    const cashOnHandForm = document.getElementById('cashOnHandForm');
+    if (cashOnHandForm) cashOnHandForm.addEventListener('submit', function(e) { e.preventDefault(); submitCashOnHand(this); });
+});
+
+async function submitForm(form, endpoint, tableId, updateFunction) {
+    const formData = new FormData(form);
+    const submitButton = form.querySelector('button[type="submit"]');
+    const originalText = submitButton.innerHTML;
+    submitButton.innerHTML = 'Processing...';
+    submitButton.disabled = true;
+    try {
+        const response = await fetch(endpoint, { method: 'POST', body: formData, headers: { 'Accept': 'application/json' } });
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) throw new Error("Server returned non-JSON response");
+        const result = await response.json();
+        if (result.success) { showAlert('success', result.message); form.reset(); await loadDayData('{{ active_date }}'); }
+        else showAlert('danger', result.message);
+    } catch (error) {
+        showAlert('danger', 'Error: ' + error.message);
+    } finally {
+        submitButton.innerHTML = originalText;
+        submitButton.disabled = false;
+    }
+}
+
+async function submitBankDeposit(form, depositType) {
+    const formData = new FormData(form);
+    formData.append('deposit_type', depositType);
+    try {
+        const response = await fetch('/update-bank-deposit', { method: 'POST', body: formData });
+        const result = await response.json();
+        if (result.success) { showAlert('success', result.message); form.reset(); loadDayData('{{ active_date }}'); }
+        else showAlert('danger', result.message);
+    } catch (error) { showAlert('danger', 'Error: ' + error.message); }
+}
+
+async function submitCashOnHand(form) {
+    const formData = new FormData(form);
+    try {
+        const response = await fetch('/update-cash-on-hand', { method: 'POST', body: formData });
+        const result = await response.json();
+        if (result.success) { showAlert('success', result.message); form.reset(); loadDayData('{{ active_date }}'); }
+        else showAlert('danger', result.message);
+    } catch (error) { showAlert('danger', 'Error: ' + error.message); }
+}
+
+async function loadDayData(date) {
+    try {
+        const response = await fetch(`/get-day-summary/${date}`);
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) throw new Error("Server returned non-JSON response");
+        const result = await response.json();
+        if (result.success && result.sales_data) { updateTables(result.sales_data, result.totals); updateSummary(result.totals || {}); }
+        else if (result.error) { console.error('Error loading day data:', result.error); }
+    } catch (error) { console.error('Error loading day data:', error); }
+}
+
+function updateOpeningStockTable(openingStock) {
+    const tableBody = document.getElementById('openingStockTable');
+    if (!tableBody) return;
+    tableBody.innerHTML = '';
+    let grandTotal = 0;
+    if (Array.isArray(openingStock)) {
+        openingStock.forEach(product => {
+            const productType = product.product_type;
+            (product.sections || []).forEach(section => {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td>${productType.charAt(0).toUpperCase()+productType.slice(1)}</td><td>${section.name||section}</td><td>${section.quantity} ${PRODUCT_TYPES[productType]?.units||''}</td><td>${formatCurrency(section.unit_price)}</td><td>${formatCurrency(section.section_total)}</td>`;
+                tableBody.appendChild(row);
+                grandTotal += section.section_total || 0;
+            });
+        });
+    } else if (openingStock && typeof openingStock === 'object') {
+        for (const [productType, sections] of Object.entries(openingStock)) {
+            for (const [section, data] of Object.entries(sections)) {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td>${productType.charAt(0).toUpperCase()+productType.slice(1)}</td><td>${section.charAt(0).toUpperCase()+section.slice(1)}</td><td>${data.quantity} ${PRODUCT_TYPES[productType]?.units||''}</td><td>${formatCurrency(data.unit_price)}</td><td>${formatCurrency(data.total_value)}</td>`;
+                tableBody.appendChild(row);
+                grandTotal += data.total_value || 0;
+            }
+        }
+    }
+    if (grandTotal > 0) {
+        const totalRow = document.createElement('tr');
+        totalRow.className = 'table-info';
+        totalRow.innerHTML = `<td colspan="4" class="text-end"><strong>Total Opening Stock Value</strong></td><td><strong>${formatCurrency(grandTotal)}</strong></td>`;
+        tableBody.appendChild(totalRow);
+    } else {
+        tableBody.innerHTML = `<tr><td colspan="5" class="text-center text-muted">No opening stock recorded yet</td></tr>`;
+    }
+}
+
+function updateCashSalesTable(cashSales) {
+    const tableBody = document.getElementById('cashSalesTable');
+    if (!tableBody) return;
+    tableBody.innerHTML = '';
+    let totalAmount = 0;
+    if (cashSales && Array.isArray(cashSales)) {
+        cashSales.forEach(sale => {
+            const row = document.createElement('tr');
+            const time = sale.timestamp ? new Date(sale.timestamp).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : '--:--';
+            row.innerHTML = `<td>${sale.name||'Unnamed Sale'}</td><td>${formatCurrency(sale.amount)}</td><td>${time}</td>`;
+            tableBody.appendChild(row);
+            totalAmount += sale.amount || 0;
+        });
+    }
+    const el = document.getElementById('totalCashSales');
+    if (el) el.textContent = formatCurrency(totalAmount);
+    if (totalAmount === 0 && tableBody.children.length === 0)
+        tableBody.innerHTML = `<tr><td colspan="3" class="text-center text-muted">No cash sales recorded yet</td></tr>`;
+}
+
+function updateCreditSalesTable(creditSales) {
+    const tableBody = document.getElementById('creditSalesTable');
+    if (!tableBody) return;
+    tableBody.innerHTML = '';
+    let totalAmount = 0;
+    if (creditSales && Array.isArray(creditSales)) {
+        creditSales.forEach(sale => {
+            const row = document.createElement('tr');
+            row.innerHTML = `<td>${sale.credit_holder||'Unknown'}</td><td>${sale.product_type ? sale.product_type.charAt(0).toUpperCase()+sale.product_type.slice(1) : 'N/A'}</td><td>${sale.section ? sale.section.charAt(0).toUpperCase()+sale.section.slice(1) : 'N/A'}</td><td>${sale.quantity||0}</td><td>${formatCurrency(sale.unit_price)}</td><td>${formatCurrency(sale.total_amount)}</td>`;
+            tableBody.appendChild(row);
+            totalAmount += sale.total_amount || 0;
+        });
+    }
+    const el = document.getElementById('totalCreditSales');
+    if (el) el.textContent = formatCurrency(totalAmount);
+    if (totalAmount === 0 && tableBody.children.length === 0)
+        tableBody.innerHTML = `<tr><td colspan="6" class="text-center text-muted">No credit sales recorded yet</td></tr>`;
+}
+
+function updateExpensesTable(expenses) {
+    const tableBody = document.getElementById('expensesTable');
+    if (!tableBody) return;
+    tableBody.innerHTML = '';
+    let totalAmount = 0;
+    if (expenses && Array.isArray(expenses)) {
+        expenses.forEach(expense => {
+            const row = document.createElement('tr');
+            const time = expense.timestamp ? new Date(expense.timestamp).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : '--:--';
+            row.innerHTML = `<td>${expense.description||'Unnamed Expense'}</td><td>${formatCurrency(expense.amount)}</td><td>${time}</td>`;
+            tableBody.appendChild(row);
+            totalAmount += expense.amount || 0;
+        });
+    }
+    const el = document.getElementById('totalExpenses');
+    if (el) el.textContent = formatCurrency(totalAmount);
+    if (totalAmount === 0 && tableBody.children.length === 0)
+        tableBody.innerHTML = `<tr><td colspan="3" class="text-center text-muted">No expenses recorded yet</td></tr>`;
+}
+
+function updateClosingStockTable(closingStock) {
+    const tableBody = document.getElementById('closingStockTable');
+    if (!tableBody) return;
+    tableBody.innerHTML = '';
+    if (closingStock && typeof closingStock === 'object') {
+        for (const [productType, sections] of Object.entries(closingStock)) {
+            for (const [section, data] of Object.entries(sections)) {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td>${productType.charAt(0).toUpperCase()+productType.slice(1)}</td><td>${section.charAt(0).toUpperCase()+section.slice(1)}</td><td>${data.quantity||0}</td>`;
+                tableBody.appendChild(row);
+            }
+        }
+    }
+    if (tableBody.children.length === 0)
+        tableBody.innerHTML = `<tr><td colspan="3" class="text-center text-muted">No closing stock recorded yet</td></tr>`;
+}
+
+function updateFarmCreditsTable(farmCredits) {
+    const tableBody = document.getElementById('farmCreditsTable');
+    if (!tableBody) return;
+    tableBody.innerHTML = '';
+    let totalAmount = 0;
+    if (farmCredits && Array.isArray(farmCredits)) {
+        farmCredits.forEach(credit => {
+            const row = document.createElement('tr');
+            const time = credit.timestamp ? new Date(credit.timestamp).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : '--:--';
+            row.innerHTML = `<td>${credit.creditor_name||'Unknown'}</td><td>${credit.description||'No description'}</td><td>${formatCurrency(credit.amount)}</td><td>${time}</td>`;
+            tableBody.appendChild(row);
+            totalAmount += credit.amount || 0;
+        });
+    }
+    const el = document.getElementById('totalFarmCredits');
+    if (el) el.textContent = formatCurrency(totalAmount);
+    if (totalAmount === 0 && tableBody.children.length === 0)
+        tableBody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">No farm credits recorded yet</td></tr>`;
+}
+
+function updateTables(salesData, totals) {
+    if (!salesData) return;
+    if (salesData.opening_stock) updateOpeningStockTable(salesData.opening_stock);
+    updateCashSalesTable(salesData.cash_sales || []);
+    updateCreditSalesTable(salesData.credit_sales || []);
+    updateExpensesTable(salesData.expenses || []);
+    const bankDeposit = salesData.bank_deposit || {};
+    document.getElementById('currentExpected').textContent = formatCurrency(bankDeposit.expected || 0);
+    document.getElementById('currentActual').textContent = formatCurrency(bankDeposit.actual || 0);
+    document.getElementById('currentCashOnHand').textContent = formatCurrency(salesData.cash_on_hand || 0);
+    updateClosingStockTable(salesData.closing_stock || {});
+    updateFarmCreditsTable(salesData.credits_to_farm || []);
+}
+
+function updateSummary(totals) {
+    document.getElementById('summaryCashSales').textContent = formatCurrency(totals.cash_sales_total);
+    document.getElementById('summaryCreditSales').textContent = formatCurrency(totals.credit_sales_total);
+    document.getElementById('summaryGrossIncome').textContent = formatCurrency(totals.gross_profit);
+    document.getElementById('summaryExpenses').textContent = formatCurrency(totals.expenses_total);
+    document.getElementById('summaryExpectedDeposit').textContent = formatCurrency(totals.expected_deposit);
+    document.getElementById('summaryActualDeposit').textContent = formatCurrency(totals.actual_deposit);
+    document.getElementById('summaryCashOnHand').textContent = formatCurrency(totals.cash_on_hand);
+    document.getElementById('summaryNetProfit').textContent = formatCurrency(totals.net_profit);
+    const badge = document.getElementById('profitLossBadge');
+    if (totals.net_profit > 0) { badge.className = 'badge bg-success'; badge.textContent = `Profit: ${formatCurrency(totals.net_profit)} K`; }
+    else if (totals.net_profit < 0) { badge.className = 'badge bg-danger'; badge.textContent = `Loss: ${formatCurrency(Math.abs(totals.net_profit))} K`; }
+    else { badge.className = 'badge bg-secondary'; badge.textContent = 'Break Even'; }
+}
+
+function formatCurrency(amount) {
+    return parseFloat(amount || 0).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+}
+
+function showAlert(type, message) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.innerHTML = `${message}<button type="button" class="btn-close" data-bs-dismiss="alert" style="filter:invert(1);opacity:0.5;"></button>`;
+    const container = document.querySelector('.container-fluid');
+    if (container.firstChild) container.insertBefore(alertDiv, container.firstChild);
+    else container.appendChild(alertDiv);
+    setTimeout(() => { if (alertDiv.parentNode) alertDiv.remove(); }, 5000);
+}
+
+async function closeDay() {
+    if (!confirm('Are you sure you want to close this day? This action cannot be undone.')) return;
+    try {
+        const form = document.getElementById('closeDayForm');
+        form.method = 'POST';
+        form.action = '/close-day';
+        form.submit();
+    } catch (error) { showAlert('danger', 'Error closing day: ' + error.message); }
+}
+
+flatpickr("#date", { dateFormat: "Y-m-d", maxDate: "today", defaultDate: "today", allowInput: true });
+</script>
+{% endblock sales_content %}

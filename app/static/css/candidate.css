@@ -1,0 +1,31 @@
+.avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-weight: 600;
+    color: white;
+}
+
+.status-badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    line-height: 1rem;
+    font-weight: 600;
+}
+
+.status-new {
+    background-color: #dbeafe;
+    color: #1e40af;
+}
+
+.status-interview {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.status-hired {
+    background-color: #d1fae5;
+    color: #065f46;
+}

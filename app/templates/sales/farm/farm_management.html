@@ -1,0 +1,161 @@
+{% extends 'sales_layout.html' %}
+{% block sales_content %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{url_for('static', filename='sales/sale_report.css')}}">
+
+<div class="container-fluid py-4">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div>
+      <h1 style="font-family:var(--font-display);font-size:2rem;color:var(--text-primary);margin:0 0 0.25rem;">Farm Management</h1>
+      <p style="color:var(--text-secondary);margin:0;font-size:0.9rem;">Manage farm reports, sales, and analysis</p>
+    </div>
+  </div>
+
+  <!-- Overview Cards -->
+  <div class="card section-cash">
+    <div class="card-header">
+      <span class="accent-dot"></span>
+      <h5>Farm Overview</h5>
+      <span class="section-number ms-auto">01</span>
+    </div>
+    <div class="card-body">
+      <div class="row g-3">
+
+        <div class="col-xl-3 col-md-6">
+          <a href="{{ url_for('farm_report.farm_report') }}" style="text-decoration:none;">
+            <div style="background:var(--bg-secondary);border:1px solid rgba(88,166,255,0.2);border-radius:var(--radius);padding:1.25rem;transition:all 0.2s;cursor:pointer;" onmouseover="this.style.borderColor='var(--accent-blue)';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='rgba(88,166,255,0.2)';this.style.transform='none'">
+              <div style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-secondary);margin-bottom:0.5rem;">Farm Sales</div>
+              <div style="font-family:var(--font-display);font-size:1.1rem;color:var(--text-primary);margin-bottom:0.3rem;">Enter & View Reports</div>
+              <p style="color:var(--text-secondary);font-size:0.82rem;margin:0;">Create and manage daily farm reports</p>
+            </div>
+          </a>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+          <a href="{{ url_for('farm_report.farm_analysis') }}" style="text-decoration:none;">
+            <div style="background:var(--bg-secondary);border:1px solid rgba(63,185,80,0.2);border-radius:var(--radius);padding:1.25rem;transition:all 0.2s;cursor:pointer;" onmouseover="this.style.borderColor='var(--accent-green)';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='rgba(63,185,80,0.2)';this.style.transform='none'">
+              <div style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-secondary);margin-bottom:0.5rem;">Production Collected</div>
+              <div style="font-family:var(--font-display);font-size:1.1rem;color:var(--text-primary);margin-bottom:0.3rem;">Reports & Analytics</div>
+              <p style="color:var(--text-secondary);font-size:0.82rem;margin:0;">Analyze farm performance and trends</p>
+            </div>
+          </a>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+          <a href="{{ url_for('farm_report.farm_report') }}" style="text-decoration:none;">
+            <div style="background:var(--bg-secondary);border:1px solid rgba(88,166,255,0.2);border-radius:var(--radius);padding:1.25rem;transition:all 0.2s;cursor:pointer;" onmouseover="this.style.borderColor='var(--accent-blue)';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='rgba(88,166,255,0.2)';this.style.transform='none'">
+              <div style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-secondary);margin-bottom:0.5rem;">Feed Consumption</div>
+              <div style="font-family:var(--font-display);font-size:1.1rem;color:var(--text-primary);margin-bottom:0.3rem;">View Past Reports</div>
+              <p style="color:var(--text-secondary);font-size:0.82rem;margin:0;">Access and review historical farm data</p>
+            </div>
+          </a>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+          <a href="{{ url_for('farm_report.farm_report') }}" style="text-decoration:none;">
+            <div style="background:var(--bg-secondary);border:1px solid rgba(248,81,73,0.2);border-radius:var(--radius);padding:1.25rem;transition:all 0.2s;cursor:pointer;" onmouseover="this.style.borderColor='var(--accent-red)';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='rgba(248,81,73,0.2)';this.style.transform='none'">
+              <div style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-secondary);margin-bottom:0.5rem;">Mortality</div>
+              <div style="font-family:var(--font-display);font-size:1.1rem;color:var(--text-primary);margin-bottom:0.3rem;">View Past Reports</div>
+              <p style="color:var(--text-secondary);font-size:0.82rem;margin:0;">Access and review historical farm data</p>
+            </div>
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="card section-open">
+    <div class="card-header">
+      <span class="accent-dot"></span>
+      <h5>Quick Actions</h5>
+      <span class="section-number ms-auto">02</span>
+    </div>
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-3">
+          <a href="{{ url_for('farm_report.farm_report') }}" class="btn btn-primary w-100">
+            <i class="fas fa-plus-circle"></i> Create New Report
+          </a>
+        </div>
+        <div class="col-md-3">
+          <a href="{{ url_for('farm_report.farm_analysis') }}" class="btn btn-success w-100">
+            <i class="fas fa-chart-bar"></i> View Analytics
+          </a>
+        </div>
+        <div class="col-md-3">
+          <a href="{{ url_for('view_farm_day.farm_day') }}" class="btn btn-info w-100">
+            <i class="fas fa-chart-bar"></i> Farm Day
+          </a>
+        </div>
+        <div class="col-md-3">
+          <button class="btn btn-secondary w-100" onclick="showDatePrompt()">
+            <i class="fas fa-search"></i> Find Report by Date
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Farm Reports -->
+  <div class="card section-summary">
+    <div class="card-header">
+      <span class="accent-dot"></span>
+      <h5>Recent Farm Reports</h5>
+    </div>
+    <div class="card-body">
+      <div class="text-center" id="recentReports" style="padding:2rem 0;color:var(--text-secondary);">
+        <div class="spinner-border" role="status" style="color:var(--accent-blue);"></div>
+        <p style="margin-top:0.75rem;font-size:0.88rem;">Loading recent reports...</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function showDatePrompt() {
+    const date = prompt('Enter report date (YYYY-MM-DD):');
+    if (date) { window.location.href = `/farm-report/${date}`; }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    fetch('/api/farm-analysis-data?limit=5')
+        .then(r => { if (!r.ok) throw new Error(); return r.json(); })
+        .then(data => {
+            const container = document.getElementById('recentReports');
+            if (data.length > 0) {
+                let html = '<div class="table-responsive"><table class="table table-sm table-bordered">';
+                html += '<thead><tr><th>Date</th><th>Total Sales</th><th>Total Production</th><th>Total Mortality</th><th>Actions</th></tr></thead><tbody>';
+                data.forEach(report => {
+                    html += `<tr>
+                        <td style="font-family:var(--font-display)">${report.date}</td>
+                        <td>${report.total_sales ? report.total_sales.toFixed(2) : '0.00'}</td>
+                        <td>${report.total_production || 0}</td>
+                        <td>${report.total_mortality || 0}</td>
+                        <td><a href="/farm-report/${report.date}" class="btn btn-sm btn-primary"><i class="fas fa-eye"></i> View</a></td>
+                    </tr>`;
+                });
+                html += '</tbody></table></div>';
+                container.innerHTML = html;
+            } else {
+                container.innerHTML = `
+                    <div style="text-align:center;padding:3rem 0;">
+                        <div style="font-size:2rem;opacity:0.3;margin-bottom:1rem;">📋</div>
+                        <h5 style="font-family:var(--font-display);color:var(--text-secondary);font-weight:400;">No reports found</h5>
+                        <p style="color:var(--text-muted);font-size:0.88rem;">Create your first farm report</p>
+                        <a href="{{ url_for('farm_report.farm_report') }}" class="btn btn-primary mt-2"><i class="fas fa-plus"></i> Create Report</a>
+                    </div>`;
+            }
+        })
+        .catch(() => {
+            document.getElementById('recentReports').innerHTML = `
+                <div class="alert alert-warning"><i class="fas fa-exclamation-triangle"></i> Unable to load recent reports. Please try again later.</div>`;
+        });
+});
+</script>
+{% endblock %}

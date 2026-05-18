@@ -1,0 +1,209 @@
+/* Keep all your existing CSS styles here */
+body {
+    font-family: 'DM Serif Display', Georgia, serif;
+}
+.sidebar {
+    background-color: #343a40;
+    color: white;
+    min-height: 100vh;
+    padding: 0;
+}
+.sidebar .nav-link {
+    color: rgba(255, 255, 255, 0.8);
+    padding: 0.75rem 1rem;
+    border-left: 4px solid transparent;
+}
+.sidebar .nav-link:hover {
+    color: white;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+.sidebar .nav-link.active {
+    color: white;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-left-color: #007bff;
+}
+.card {
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+    border: none;
+}
+.card-header {
+    border-radius: 10px 10px 0 0 !important;
+    font-weight: 600;
+}
+.table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+}
+.badge {
+    font-size: 0.85em;
+    padding: 0.4em 0.8em;
+}
+.summary-card {
+    transition: transform 0.2s;
+}
+.summary-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+.activity-timeline {
+    border-left: 3px solid #007bff;
+    padding-left: 20px;
+    margin-left: 10px;
+}
+.activity-item {
+    position: relative;
+    padding-bottom: 20px;
+}
+.activity-item:before {
+    content: '';
+    position: absolute;
+    left: -26px;
+    top: 0;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: #007bff;
+    border: 3px solid white;
+}
+.stat-card {
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+.stat-card .stat-value {
+    font-size: 1.8rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+.stat-card .stat-label {
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+.profit { background-color: #d4edda; color: #155724; }
+.loss { background-color: #f8d7da; color: #721c24; }
+.neutral { background-color: #e2e3e5; color: #383d41; }
+.info { background-color: #d1ecf1; color: #0c5460; }
+
+#daysGrid button {
+width: 48px;
+height: 48px;
+border-radius: 10px;
+font-weight: 600;
+}
+
+/* ============================= */
+/* Date Picker Card Styling */
+/* ============================= */
+
+.date-picker-card {
+    border: none;
+    border-radius: 18px;
+    background: #ffffff;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
+}
+
+/* Header */
+.date-picker-header {
+    background: transparent;
+    border-bottom: none;
+    padding: 1.5rem 1.5rem 0.5rem;
+    font-weight: 600;
+}
+
+/* Month Input */
+#monthPicker {
+    border-radius: 14px;
+    padding: 14px 16px;
+    font-size: 1.1rem;
+    border: 1px solid #e5e7eb;
+    background-color: #fafafa;
+    transition: all 0.25s ease;
+}
+
+#monthPicker:focus {
+    background-color: #fff;
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.15);
+}
+
+/* ============================= */
+/* Days Grid */
+/* ============================= */
+
+#daysGrid {
+    margin-top: 1rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));
+    gap: 12px;
+}
+
+/* Day Buttons */
+#daysGrid button {
+    height: 52px;
+    border-radius: 14px;
+    font-weight: 600;
+    font-size: 1rem;
+    border: none;
+    transition: all 0.25s ease;
+}
+
+/* Active Day */
+#daysGrid .btn-success {
+    background: #000;
+    color: #fff;
+    width: auto;
+}
+
+/* Closed Day */
+#daysGrid .btn-outline-secondary {
+    border: 1px solid #e5e7eb;
+    color: #374151;
+    width: auto;
+    background: aliceblue;
+}
+
+/* Hover Effects */
+#daysGrid button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+}
+
+/* Selected Day */
+#daysGrid button.active {
+    background: #0d6efd;
+    color: #fff;
+}
+
+/* No Data Text */
+#daysGrid .text-muted {
+    grid-column: 1 / -1;
+    text-align: center;
+    font-size: 0.95rem;
+    padding: 1rem 0;
+}
+.stats-expenses .stat-value{
+
+    color:red;
+
+}
+.stats-expenses{
+    background-color: rgb(250, 221, 221);
+}
+.stats-deposit .profit{
+    color: #155724;
+}
+.stats-deposit .loss{
+    color: #e90101;
+}
+.stats-deposit .stat-value{
+    color: rgb(95, 94, 94);
+}
+.stats-deposit{
+    background-color: rgb(244, 242, 242);
+}
+.stat-value{
+    font-size: medium;
+}
+
