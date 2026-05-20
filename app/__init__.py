@@ -36,15 +36,7 @@ farm_percentage_collection = database['Farm Percentages']
 app = Flask(__name__, template_folder='templates')
 app.config['SECRET_KEY'] = '44c5450b402af78d5b8851e210739a80' # setting up the secret key for the application
 
-# setting up the mail 
-# app.config['MAIL_SERVER'] = 'smtp.gmail.com'
-# app.config['MAIL_PORT'] = 587
-# app.config['MAIL_USE_TLS'] = True
-# app.config['MAIL_USERNAME'] = 'kambole520@gmail.com'
-# app.config['MAIL_PASSWORD'] = 'gokt rzoy jglg pztl'
-# app.config['MAIL_DEFAULT_SENDER'] = 'kambole520@gmail.com' 
 
-# mail = Mail(app)
 
 from app.routes import (login, registration, sales_dashboard, sales, view_sales_day, farm_sales, view_farm_day) 
 
